@@ -1,5 +1,6 @@
-from scipy.io import wavfile
 import numpy as np
+from scipy.io import wavfile
+
 
 def get_mono_left_channel_sound_and_sampling_frequency(filename):
     sampling_frequency, sound = wavfile.read(filename)
@@ -20,12 +21,6 @@ def get_segment(sound=None, i_segment=None, params=None):
         return sound[i_start: i_end]
     else:
         return np.zeros(i_end - i_start)
-
-def count_segments(sound=None, params=None):
-    samples_per_segment = params["segment_len"]
-    n_gap = params["n_gap"]
-    return int(np.floor((len(sound) - samples_per_segment)/n_gap))
-
 
 
 if __name__ == "__main__":

@@ -1,11 +1,11 @@
-
+from database_tools.sound_file_loader import get_segment
 import numpy as np
 from scipy.sparse import bsr_matrix
 from scipy.sparse.linalg import lsqr
 from scipy.sparse import linalg
 import scipy.io.wavfile
 import os
-
+from common.count_segments import count_segments
 
 package_directory = os.path.dirname(os.path.abspath(__file__))
 
@@ -14,9 +14,9 @@ class SpectralEnvelopeExtractor:
 
     def __init__(self, params):
 
-        # number of elementary _triangle functions
-        self.n_triangle_func = params['n_triangle_function']
+        self.params = params
 
+        self.n_triangle_func = params['n_triangle_function']
         self.sampling_frequency = params["sampling_frequency"]
 
         # nFFT is the number samples taken to slice the audio into chunks for FFT analysis
@@ -117,4 +117,19 @@ class SpectralEnvelopeExtractor:
         full_spectral_envelope[self.nFFT//2:self.nFFT] = half_spectral_envelope[::-1]
 
         return full_spectral_envelope
+
+
+    def get_spectral_envelope_from_sound(self, sound=None):
+
+        apowin2 = self.apowin2
+        n_segment = count_segments(sound=sound, params=self.params)
+        spectral_envelope_coeffs_list = []
+
+        for i_segment in range(n_segment):
+            x = get_segment(sound=sound, i_segment=i_segment, params=self.params)
+            x_apodized = x * apowin2
+            spectral_envelope_coeffs = self.get_spectral_envelope_coeffs(x_apodized)
+            spectral_envelope_coeffs_list.append(spectral_envelope_coeffs)
+
+        return spectral_envelope_coeffs_list
 
