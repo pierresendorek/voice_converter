@@ -3,6 +3,7 @@ import numpy as np
 
 def get_params():
     params = {
+        "project_base_path": "/home/monsieur/projets/voice_conversion",
         "sampling_frequency": 44100,
         "segment_len": 2048,
         "fq_elem_func_min": 50.0,

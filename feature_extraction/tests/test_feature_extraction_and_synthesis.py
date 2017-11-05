@@ -14,7 +14,7 @@ import numpy as np
 
 params = get_params()
 
-filename = "/home/monsieur/projets/voice_conversion/data/bruce_willis/Studio/18.wav"
+filename = "/home/monsieur/projets/voice_conversion/data/bruce_willis/Studio/1.wav"
 #filename = "/home/monsieur/maria.wav"
 sound, sampling_frequency = get_mono_left_channel_sound_and_sampling_frequency(filename)
 
@@ -27,7 +27,10 @@ sound_features = voice_feature_extractor(sound=sound, params=params)
 spectral_envelope_coeffs_noise_list = sound_features["spectral_envelope_coeffs_noise_list"]
 spectral_envelope_coeffs_harmonic_list = sound_features["spectral_envelope_coeffs_harmonic_list"]
 period_list = sound_features["period_list"]
+# period_list_bzz = [sampling_frequency/220]*len(period_list)
 
+
+frequency_list = [sampling_frequency/p for p in period_list]
 
 
 from synthesis.voice_synthesizer import generate_periodic_sound, generate_periodic_filtered_sound, \
@@ -49,8 +52,8 @@ write("/home/monsieur/temp/out_periodic.wav", 44100, out_sound_periodic / np.max
 write("/home/monsieur/temp/out_periodic_filt.wav", 44100, out_sound_periodic_filtered / np.max(np.abs(out_sound_periodic_filtered)))
 write("/home/monsieur/temp/reconstruction.wav", 44100, reconstruction)
 
-#plt.plot(period_list)
-#plt.show()
+plt.plot(frequency_list, linewidth=5)
+plt.show()
 
 
 
