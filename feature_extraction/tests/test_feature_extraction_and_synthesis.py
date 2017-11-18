@@ -1,7 +1,7 @@
 from params.params import get_params
 
 from database_tools.sound_file_loader import get_mono_left_channel_sound_and_sampling_frequency
-
+import os
 from feature_extraction.pitch_estimator import PitchEstimator
 from feature_extraction.periodic_and_noise_separator import PeriodicAndNoiseSeparator
 from feature_extraction.spectral_enveloppe_extractor import SpectralEnvelopeExtractor
@@ -14,14 +14,16 @@ import numpy as np
 
 params = get_params()
 
-filename = "/home/monsieur/projets/voice_conversion/data/bruce_willis/Studio/1.wav"
+filename = os.path.join(params["project_base_path"], "data/bruce_willis/Studio/1.wav")
 #filename = "/home/monsieur/maria.wav"
 sound, sampling_frequency = get_mono_left_channel_sound_and_sampling_frequency(filename)
 
 
-from feature_extraction.voice_feature_extractor import voice_feature_extractor
+from feature_extraction.voice_feature_extractor import VoiceFeatureExtractor
 
-sound_features = voice_feature_extractor(sound=sound, params=params)
+voice_feature_extractor = VoiceFeatureExtractor(params)
+
+sound_features = voice_feature_extractor.extract(sound=sound)
 
 
 spectral_envelope_coeffs_noise_list = sound_features["spectral_envelope_coeffs_noise_list"]
@@ -31,7 +33,6 @@ period_list = sound_features["period_list"]
 
 
 frequency_list = [sampling_frequency/p for p in period_list]
-
 
 from synthesis.voice_synthesizer import generate_periodic_sound, generate_periodic_filtered_sound, \
     generate_filtered_noise
@@ -47,10 +48,12 @@ out_sound_periodic_filtered =generate_periodic_filtered_sound(segment_period_exp
 reconstruction = out_sound_noise + out_sound_periodic_filtered
 reconstruction = reconstruction / max(abs(reconstruction))
 
-write("/home/monsieur/temp/out.wav", 44100, out_sound_noise / np.max(np.abs(out_sound_noise)))
-write("/home/monsieur/temp/out_periodic.wav", 44100, out_sound_periodic / np.max(np.abs(out_sound_periodic)))
-write("/home/monsieur/temp/out_periodic_filt.wav", 44100, out_sound_periodic_filtered / np.max(np.abs(out_sound_periodic_filtered)))
-write("/home/monsieur/temp/reconstruction.wav", 44100, reconstruction)
+base_path = "/Users/pierresendorek/"
+
+write(base_path + "temp/out.wav", 44100, out_sound_noise / np.max(np.abs(out_sound_noise)))
+write(base_path + "temp/out_periodic.wav", 44100, out_sound_periodic / np.max(np.abs(out_sound_periodic)))
+write(base_path + "temp/out_periodic_filt.wav", 44100, out_sound_periodic_filtered / np.max(np.abs(out_sound_periodic_filtered)))
+write(base_path + "temp/reconstruction.wav", 44100, reconstruction)
 
 plt.plot(frequency_list, linewidth=5)
 plt.show()

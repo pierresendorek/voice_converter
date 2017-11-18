@@ -1,9 +1,9 @@
 import numpy as np
 
 
-def get_dtw_matrix(s, t, distance_function):
-    n = len(s)
-    m = len(t)
+def get_dtw_matrix_and_corresponding_segments(x_list, y_list, distance_function):
+    n = len(x_list)
+    m = len(y_list)
 
     dtw_matrix = np.zeros([n, m])
 
@@ -21,7 +21,7 @@ def get_dtw_matrix(s, t, distance_function):
 
     for i in range(1, n):
         for j in range(1, m):
-            cost = distance_function(s[i], t[j])
+            cost = distance_function(x_list[i], y_list[j])
             local_distance_matrix[i, j] = cost
 
             possible_prev = [dtw_matrix[i-1, j],         # insertion
@@ -29,7 +29,6 @@ def get_dtw_matrix(s, t, distance_function):
                              dtw_matrix[i-1, j-1]]
 
             dtw_matrix[i, j] = cost + min(possible_prev)
-
 
     # tracing back the optimal path
     [i, j] = [n-1, m-1]

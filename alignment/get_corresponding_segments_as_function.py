@@ -1,5 +1,5 @@
 import numpy as np
-
+from pprint import pprint
 
 def a_to_average_b_function(a, a_to_average_b):
     if a in a_to_average_b.keys():
@@ -10,24 +10,23 @@ def a_to_average_b_function(a, a_to_average_b):
         return a_to_average_b[sorted_keys_list[idx_min]]
 
 
-def get_corresponding_segments_function(corresponding_segments):
+def get_corresponding_segments_function(corresponding_segments_idx_list):
 
     a_to_b_list = {}
 
-    for ab in corresponding_segments:
+    for ab in corresponding_segments_idx_list:
         a, b = ab
         b_list = a_to_b_list.get(a, [])
         b_list.append(b)
         a_to_b_list[a] = b_list
 
-    print(a_to_b_list)
+   # pprint(a_to_b_list)
 
     a_to_average_b = {}
 
     for a in a_to_b_list.keys():
         b_list = a_to_b_list[a]
         a_to_average_b[a] = np.mean(b_list)
-
 
     return lambda a : a_to_average_b_function(a, a_to_average_b)
 

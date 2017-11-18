@@ -3,7 +3,8 @@ import numpy as np
 
 def get_params():
     params = {
-        "project_base_path": "/home/monsieur/projets/voice_conversion",
+        "project_base_path": "/Users/pierresendorek/projets/voice_converter",
+        "temp_path":"/Users/pierresendorek/temp/",
         "sampling_frequency": 44100,
         "segment_len": 2048,
         "fq_elem_func_min": 50.0,
@@ -14,7 +15,7 @@ def get_params():
         "verbose": True
     }
 
-    params["n_gap"] = params["segment_len"] // 4
+    params["n_gap"] = params["segment_len"] // 4 # 512 samples @ 44100Hz ~ 0.011 of a second
 
     params["apowin"] = np.sin(np.linspace(0, np.pi, num=params["segment_len"], endpoint=False))
     params["apowin2"] = params["apowin"] ** 2

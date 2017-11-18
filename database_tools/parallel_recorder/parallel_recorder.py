@@ -35,5 +35,3 @@ while i < len(bruce_willis_file_and_path_list):
     if c == "p":
         i -= 1
 
-#retvalue = os.system("rec -c1 -r 441000 test.wav")
-#print(retvalue)
