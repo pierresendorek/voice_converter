@@ -1,4 +1,5 @@
 from database_tools.sound_file_loader import get_mono_left_channel_sound_and_sampling_frequency
+
 from feature_extraction.spectral_enveloppe_extractor import SpectralEnvelopeExtractor
 from params.params import get_params
 import os
@@ -9,12 +10,16 @@ from alignment.get_corresponding_segments_as_function import get_corresponding_s
 import numpy as np
 from feature_extraction.rough_spectral_features_extractor import RoughSpectralEnvelopeExtractor
 
-from common.get_element_from_list import get_element_from_list_constant_outside
+from common.get_element_from_list import get_element_from_list_constant_outside, get_element_from_list_zero_outside
 from pprint import pprint
 
 
 class PairSoundFeature:
-    def __init__(self, bw_range_source, fw_range_source, bw_range_target=None, params=None):
+    def __init__(self, params=None):
+
+        bw_range_source = params["bw_range_source"]
+        fw_range_source = params["fw_range_source"]
+        bw_range_target = params["bw_range_target"]
 
         assert bw_range_source > 0
         assert fw_range_source > 0
@@ -27,6 +32,7 @@ class PairSoundFeature:
         self.fw_range_source = fw_range_source
         self.bw_range_target = bw_range_target
         self.feature_length = (params["n_triangle_function"] * 2 + 1) * (bw_range_source + fw_range_source + bw_range_target)
+
 
     def get_feature_length(self):
         return self.feature_length
@@ -84,13 +90,13 @@ class PairSoundFeature:
             for k in range(-self.bw_range_target, 0):
                 # We add sound features from the target speaker from previous time steps
                 feature_source_array[0, - k - 1 + self.fw_range_source + self.bw_range_source] = \
-                    get_element_from_list_constant_outside(i_target + k, target_sound_features["period_list"])
+                    get_element_from_list_zero_outside(i_target + k, target_sound_features["period_list"])
 
                 feature_source_array[1: 1 + n_triangle_function, - k - 1 + self.fw_range_source + self.bw_range_source] = \
-                    get_element_from_list_constant_outside(i_target + k, target_sound_features["spectral_envelope_coeffs_harmonic_list"])
+                    get_element_from_list_zero_outside(i_target + k, target_sound_features["spectral_envelope_coeffs_harmonic_list"])
 
                 feature_source_array[1 + n_triangle_function:1 + 2 * n_triangle_function, - k - 1 + self.fw_range_source + self.bw_range_source] = \
-                    get_element_from_list_constant_outside(i_target + k,
+                    get_element_from_list_zero_outside(i_target + k,
                                                            target_sound_features["spectral_envelope_coeffs_noise_list"])
 
             # print(feature_source_array)
