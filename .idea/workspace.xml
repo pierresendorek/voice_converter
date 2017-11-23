@@ -2,15 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="18ddd6d3-900c-486c-a8ba-27c61fa01bec" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/common/math/piecewise_linear_function.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/database_tools/parallel_corpus_maker.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/machine_learning/train.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/synthesis/recursive_synth.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/database_tools/parallel_recorder/parallel_recorder.py" afterPath="$PROJECT_DIR$/database_tools/parallel_recorder/parallel_recorder.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/feature_extraction/pair_sequence_feature_target_getter.py" afterPath="$PROJECT_DIR$/feature_extraction/pair_sequence_feature_target_getter.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/machine_learning/neural_network.py" afterPath="$PROJECT_DIR$/machine_learning/neural_network.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/params/params.py" afterPath="$PROJECT_DIR$/params/params.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/synthesis/recursive_synth.py" afterPath="$PROJECT_DIR$/synthesis/recursive_synth.py" />
     </list>
     <ignored path="$PROJECT_DIR$/.idea/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -29,8 +22,8 @@
       <file leaf-file-name="recursive_synth.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/synthesis/recursive_synth.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="362">
-              <caret line="38" column="0" lean-forward="true" selection-start-line="38" selection-start-column="0" selection-end-line="38" selection-end-column="0" />
+            <state relative-caret-position="542">
+              <caret line="50" column="0" lean-forward="true" selection-start-line="50" selection-start-column="0" selection-end-line="50" selection-end-column="0" />
               <folding>
                 <element signature="e#0#73#0" expanded="true" />
               </folding>
@@ -592,7 +585,14 @@
       <option name="project" value="LOCAL" />
       <updated>1511021922764</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="added neural network + improved feature extraction">
+      <created>1511475076069</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1511475076069</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="TodoView">
@@ -608,7 +608,7 @@
     <frame x="0" y="0" width="1920" height="1200" extended-state="0" />
     <editor active="false" />
     <layout>
-      <window_info id="Project" active="true" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.15323855" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.15323855" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3293247" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32743362" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
@@ -994,8 +994,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/synthesis/recursive_synth.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="362">
-          <caret line="38" column="0" lean-forward="true" selection-start-line="38" selection-start-column="0" selection-end-line="38" selection-end-column="0" />
+        <state relative-caret-position="542">
+          <caret line="50" column="0" lean-forward="true" selection-start-line="50" selection-start-column="0" selection-end-line="50" selection-end-column="0" />
           <folding>
             <element signature="e#0#73#0" expanded="true" />
           </folding>
