@@ -23,8 +23,8 @@ class PiecewiseLinearFunction:
         lesser_than_values = list(filter(lambda i_t: i_t[1] < time, enumerate(self.time_list)))
         greater_than_values = list(filter(lambda i_t: i_t[1] >= time, enumerate(self.time_list)))
 
-        print("lesser_than_values", lesser_than_values)
-        print("greater_than_values", greater_than_values)
+        #print("lesser_than_values", lesser_than_values)
+        #print("greater_than_values", greater_than_values)
 
         if lesser_than_values == []:
             i_time_prev = 0

@@ -90,13 +90,13 @@ class PairSoundFeature:
             for k in range(-self.bw_range_target, 0):
                 # We add sound features from the target speaker from previous time steps
                 feature_source_array[0, - k - 1 + self.fw_range_source + self.bw_range_source] = \
-                    get_element_from_list_zero_outside(i_target + k, target_sound_features["period_list"])
+                    get_element_from_list_constant_outside(i_target + k, target_sound_features["period_list"])
 
                 feature_source_array[1: 1 + n_triangle_function, - k - 1 + self.fw_range_source + self.bw_range_source] = \
-                    get_element_from_list_zero_outside(i_target + k, target_sound_features["spectral_envelope_coeffs_harmonic_list"])
+                    get_element_from_list_constant_outside(i_target + k, target_sound_features["spectral_envelope_coeffs_harmonic_list"])
 
                 feature_source_array[1 + n_triangle_function:1 + 2 * n_triangle_function, - k - 1 + self.fw_range_source + self.bw_range_source] = \
-                    get_element_from_list_zero_outside(i_target + k,
+                    get_element_from_list_constant_outside(i_target + k,
                                                            target_sound_features["spectral_envelope_coeffs_noise_list"])
 
             # print(feature_source_array)

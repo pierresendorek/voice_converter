@@ -39,7 +39,7 @@ class PeriodicAndNoiseSeparator:
         self.periodic_function_basis_dict = {}
 
         if params["verbose"]:
-            print("Initializing periodic function basis for all periods")
+            print("Initializing periodic function basis for all periods...")
 
         for period in self.period_list:
             self.periodic_function_basis_dict[period] = self.create_apodized_periodic_function_basis_for_period(period)
