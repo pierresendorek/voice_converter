@@ -1,5 +1,6 @@
 import os
 from pprint import pprint
+import re
 
 def get_file_and_path_list(directory):
     """
@@ -17,8 +18,9 @@ def get_file_and_path_list(directory):
         # print("files : ", files)
         for filename in files:
             # Join the two strings in order to form the full filepath.
-            filepath = os.path.join(root, filename)
-            file_paths.append([root, filename])  # Add it to the list.
+            if re.match('(.)+\.wav$', filename):
+                filepath = os.path.join(root, filename)
+                file_paths.append([root, filename])  # Add it to the list.
 
     return file_paths  # Self-explanatory.
 

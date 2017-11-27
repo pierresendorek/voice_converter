@@ -13,9 +13,9 @@ def get_params():
         "fq_voice_max": 300.0,
         "n_triangle_function": 40,
         "verbose": True,
-        "bw_range_source": 5,
-        "fw_range_source": 5,
-        "bw_range_target": 5}
+        "bw_range_source": 3, # 20
+        "fw_range_source": 3, # 10
+        "bw_range_target": 1} # 20
 
     params["n_gap"] = params["segment_len"] // 4 # 512 samples @ 44100Hz ~ 0.011 of a second
 

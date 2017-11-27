@@ -1,7 +1,11 @@
 import numpy as np
 
+def distance_function(x, y):
+    return np.sqrt(np.linalg.norm(x - y))
 
-def get_dtw_matrix_and_corresponding_segments(x_list, y_list, distance_function):
+
+def get_dtw_matrix_and_corresponding_segments(x_list, y_list):
+
     n = len(x_list)
     m = len(y_list)
 

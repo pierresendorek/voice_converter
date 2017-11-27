@@ -15,13 +15,26 @@ class ParallelCorpusMaker:
         self.params = params
 
         # takes filenames
-        self._bruce_willis_file_and_path_list = get_file_and_path_list(
+        bw_filme = get_file_and_path_list(
+            os.path.join(self.params["project_base_path"], "data/bruce_willis/FILME"))
+
+        bw_studio = get_file_and_path_list(
             os.path.join(self.params["project_base_path"], "data/bruce_willis/Studio"))
 
+
+        self._bruce_willis_file_and_path_list = bw_studio #+
+
         # assembles the whole corresponding file name for Pierre
-        self._pierre_sendorek_file_and_path_list = [
+        ps_filme = [
+            (os.path.join(self.params["project_base_path"], "data/pierre_sendorek/FILME"),
+             filename[1]) for filename in bw_filme]
+
+        ps_studio = [
             (os.path.join(self.params["project_base_path"], "data/pierre_sendorek/Studio"),
-             filename[1]) for filename in self._bruce_willis_file_and_path_list]
+             filename[1]) for filename in bw_studio]
+
+        self._pierre_sendorek_file_and_path_list = ps_studio #+
+
 
         self.pierre_sendorek_full_path_list = [self._assemble_name(path_and_file) for path_and_file in self._pierre_sendorek_file_and_path_list]
         self.bruce_willis_full_path_list = [self._assemble_name(path_and_file) for path_and_file in self._bruce_willis_file_and_path_list]

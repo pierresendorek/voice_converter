@@ -31,7 +31,10 @@ class NeuralNetwork:
         self.expected_output_placeholder = tf.placeholder(dtype=tf.float32, shape=[None, self.final_layer_num_outputs], name="expected_output_placeholder")
 
         # Creating loss
-        self.loss = tf.reduce_sum(tf.abs(self.output_layer - self.expected_output_placeholder))/tf.reduce_sum(tf.abs(self.expected_output_placeholder))
+
+        cost = lambda x : tf.reduce_sum(tf.square(x))
+
+        self.loss = cost(self.output_layer - self.expected_output_placeholder)/cost(self.expected_output_placeholder)
 
 
     def create_neural_network(self, intermediate_layers_num_output_list=None):
@@ -41,6 +44,8 @@ class NeuralNetwork:
 
         # loop
         num_inputs = self.input_vector_len
+
+        # layer = tf.log1p(tf.nn.elu(layer))
 
         for i_layer, num_outputs in enumerate(intermediate_layers_num_output_list):
             if i_layer == 0:
@@ -53,7 +58,7 @@ class NeuralNetwork:
             W = tf.Variable(initial_value=np.random.randn(num_inputs, num_outputs) * w_mult_factor, dtype=tf.float32)
             b = tf.Variable(initial_value=np.random.randn(num_outputs) * b_mult_factor, dtype=tf.float32)
             layer = tf.add(tf.matmul(layer, W), b)
-            layer = tf.nn.elu(layer)
+            layer = tf.nn.sigmoid(layer)
             num_inputs = num_outputs
 
             #layer = tf.contrib.layers.fully_connected(inputs=layer,

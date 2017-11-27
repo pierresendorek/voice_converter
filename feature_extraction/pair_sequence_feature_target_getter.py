@@ -49,8 +49,7 @@ class PairSoundFeature:
          corresponding_segment_index_list,
          local_distance_matrix) = \
             get_dtw_matrix_and_corresponding_segments(rough_features_source,
-                                                      rough_features_target,
-                                                      distance_function=lambda x, y: np.linalg.norm(x - y))
+                                                      rough_features_target)
 
         corresponding_segment = get_corresponding_segments_function(corresponding_segment_index_list)
 
@@ -69,14 +68,15 @@ class PairSoundFeature:
             feature_source_array = np.zeros([n_triangle_function * 2 + 1, self.fw_range_source + self.bw_range_source + self.bw_range_target])
             feature_target_array = np.zeros([n_triangle_function * 2 + 1 + 1])
 
+            # target features
             feature_target_array[0] = delta_t
-            feature_target_array[1] = get_element_from_list_constant_outside(i, target_sound_features["period_list"])
+            feature_target_array[1] = get_element_from_list_constant_outside(i_target, target_sound_features["period_list"])
             feature_target_array[2: 2 + n_triangle_function] = \
-                get_element_from_list_constant_outside(i, target_sound_features["spectral_envelope_coeffs_harmonic_list"])
-
+                get_element_from_list_constant_outside(i_target, target_sound_features["spectral_envelope_coeffs_harmonic_list"])
             feature_target_array[2 + n_triangle_function:2 + 2 * n_triangle_function] = \
-                get_element_from_list_constant_outside(i, target_sound_features["spectral_envelope_coeffs_noise_list"])
+                get_element_from_list_constant_outside(i_target, target_sound_features["spectral_envelope_coeffs_noise_list"])
 
+            # source features
             for k in range(-self.bw_range_source, self.fw_range_source):
                 feature_source_array[0, k + self.bw_range_source] = \
                     get_element_from_list_constant_outside(i + k, source_sound_features["period_list"])
@@ -89,14 +89,15 @@ class PairSoundFeature:
 
             for k in range(-self.bw_range_target, 0):
                 # We add sound features from the target speaker from previous time steps
+                # zero outside : keep this to have a neural network with no burn-in time
                 feature_source_array[0, - k - 1 + self.fw_range_source + self.bw_range_source] = \
-                    get_element_from_list_constant_outside(i_target + k, target_sound_features["period_list"])
+                    get_element_from_list_zero_outside(i_target + k, target_sound_features["period_list"])
 
                 feature_source_array[1: 1 + n_triangle_function, - k - 1 + self.fw_range_source + self.bw_range_source] = \
-                    get_element_from_list_constant_outside(i_target + k, target_sound_features["spectral_envelope_coeffs_harmonic_list"])
+                    get_element_from_list_zero_outside(i_target + k, target_sound_features["spectral_envelope_coeffs_harmonic_list"])
 
                 feature_source_array[1 + n_triangle_function:1 + 2 * n_triangle_function, - k - 1 + self.fw_range_source + self.bw_range_source] = \
-                    get_element_from_list_constant_outside(i_target + k,
+                    get_element_from_list_zero_outside(i_target + k,
                                                            target_sound_features["spectral_envelope_coeffs_noise_list"])
 
             # print(feature_source_array)

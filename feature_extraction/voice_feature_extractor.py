@@ -25,7 +25,6 @@ class VoiceFeatureExtractor:
         spectral_envelope_coeffs_noise_list = []
         spectral_envelope_coeffs_harmonic_list = []
 
-        sound_out = np.zeros(sound.shape)
 
         for i_segment in range(n_segment):
             x = get_segment(sound=sound,  i_segment=i_segment, params=self.params)

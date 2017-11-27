@@ -1,5 +1,8 @@
 import operator
 
+from copy import deepcopy
+
+
 class PiecewiseLinearFunction:
 
     def __init__(self, params=None):
@@ -12,8 +15,8 @@ class PiecewiseLinearFunction:
         if self.time_list != []:
             assert time > self.time_list[-1]
 
-        self.time_list.append(time)
-        self.value_list.append(value)
+        self.time_list.append(deepcopy(time))
+        self.value_list.append(deepcopy(value))
 
 
     def get_value(self, time=None):
@@ -64,7 +67,7 @@ if __name__ == "__main__":
     plf.add_point(time=5, value=1*u)
     plf.add_point(time=7, value=6*u)
 
-    v = plf.get_value(time=3.5)
+    v = plf.get_value(time=3.99)
     print(v)
 
 

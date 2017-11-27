@@ -4,6 +4,8 @@ from scipy.io import wavfile
 
 def get_mono_left_channel_sound_and_sampling_frequency(filename):
     sampling_frequency, sound = wavfile.read(filename)
+    sound = sound/np.max(np.abs(sound))
+    sound = sound + np.random.randn(*sound.shape) / 1000
     if len(sound.shape) > 1:
         return sound[: ,0], sampling_frequency
     else:

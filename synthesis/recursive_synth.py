@@ -1,3 +1,5 @@
+from copy import deepcopy
+
 from common.get_element_from_list import get_element_from_list_constant_outside
 from common.math.piecewise_linear_function import PiecewiseLinearFunction
 import tensorflow as tf
@@ -10,9 +12,10 @@ from feature_extraction.voice_feature_extractor import VoiceFeatureExtractor
 from params.params import get_params
 from common.math.relu import relu, np_relu
 from synthesis.voice_synthesizer import generate_filtered_noise, generate_periodic_sound, \
-    generate_periodic_filtered_sound
+    generate_periodic_filtered_sound, synthesize_voice
 
 from scipy.io.wavfile import write
+from pprint import pprint
 
 
 class RecursiveSynth:
@@ -31,11 +34,13 @@ class RecursiveSynth:
         self.sess = tf.InteractiveSession()
         self.sess.run(tf.global_variables_initializer())
 
-#        saver = tf.train.Saver({"input_placeholder": self.input_placeholder, "output_layer": self.output_layer})
+        # saver = tf.train.Saver({"input_placeholder": self.input_placeholder, "output_layer": self.output_layer})
 
 
         path = os.path.join(params["project_base_path"], "models/bruce_willis/")
-        file_to_open = path + "model.ckpt-770000.meta"
+        file_to_open = path + "model.ckpt-70000.meta"
+
+        pprint(file_to_open)
 
         saver = tf.train.import_meta_graph(file_to_open)
         saver.restore(self.sess, tf.train.latest_checkpoint(path))
@@ -47,8 +52,6 @@ class RecursiveSynth:
 
 
 
-
-
     def synthesis_from_prediction(self, source_sound_features):
 
         n_time_steps_source = len(source_sound_features["period_list"])
@@ -57,16 +60,16 @@ class RecursiveSynth:
         bw_range_source = self.params["bw_range_source"]
         bw_range_target = self.params["bw_range_target"]
 
-        feature_source_array = np.zeros(
-            [n_triangle_function * 2 + 1, fw_range_source + bw_range_source + bw_range_target])
-
         i_target = 0.0
 
         piecewise_linear_function = PiecewiseLinearFunction(params=params)
-        piecewise_linear_function.add_point(time=-1, value=np.zeros([self.params["n_triangle_function"] * 2 + 1]))
+        piecewise_linear_function.add_point(time=-1, value=np.abs(np.random.randn(self.params["n_triangle_function"] * 2 + 1)))
 
+        provided_input_list = []
 
         for i in range(n_time_steps_source):
+            feature_source_array = np.zeros(
+                [n_triangle_function * 2 + 1, fw_range_source + bw_range_source + bw_range_target])
 
             # gathering features
             for k in range(-bw_range_source, fw_range_source):
@@ -82,15 +85,30 @@ class RecursiveSynth:
             for k in range(-bw_range_target, 0):
                 # We add sound features from the target speaker from previous time steps
                 feature_source_array[:, - k - 1 + fw_range_source + bw_range_source] = \
-                    piecewise_linear_function.get_value(i_target + k)
+                    piecewise_linear_function.get_value(time=i_target + k)
+
+
+            #print(feature_source_array)
 
             # prediction
-            predicted_vector = self.sess.run(self.output_layer, feed_dict={self.input_placeholder: np.log(1 + np_relu(np.reshape(feature_source_array, [1, -1])))})
+            predicted_vector, provided_input = self.sess.run([self.output_layer, self.input_placeholder], feed_dict={self.input_placeholder: np.reshape(feature_source_array, [1, -1])})
+
+
+            #if i>0:
+            #    print(predicted_vector - prev_predicted_vector)
+
+            prev_predicted_vector =  predicted_vector
+            provided_input_list.append(provided_input)
+            piecewise_linear_function.add_point(time=i_target, value=predicted_vector[0, 1:])
 
             delta_t = predicted_vector[0, 0]
             i_target += 1 #relu(delta_t) + 1E-6
 
-            piecewise_linear_function.add_point(time=i_target, value=predicted_vector[0, 1:])
+
+        #pprint(piecewise_linear_function.value_list)
+        #pprint(piecewise_linear_function.time_list)
+
+        #pprint(provided_input_list)
 
         # generating the whole sequence
         time_target = int(np.floor(i_target))
@@ -100,30 +118,29 @@ class RecursiveSynth:
         target_spectral_envelope_coeffs_noise_list = []
 
         for i in range(time_target):
-            feature_vector = piecewise_linear_function.get_value(time=i)
+            feature_vector = deepcopy(piecewise_linear_function.get_value(time=i))
             target_period_list.append(feature_vector[0])
             target_spectral_envelope_coeffs_harmonic_list.append(feature_vector[1:n_triangle_function+1])
             target_spectral_envelope_coeffs_noise_list.append(feature_vector[n_triangle_function+1:])
 
+        feature_dict = {"period_list": target_period_list,
+                        "spectral_envelope_coeffs_harmonic_list": target_spectral_envelope_coeffs_harmonic_list,
+                        "spectral_envelope_coeffs_noise_list": target_spectral_envelope_coeffs_harmonic_list}
+
+
         ####
 
-        out_sound_noise = generate_filtered_noise(target_spectral_envelope_coeffs_noise_list, params)
-        out_sound_periodic = generate_periodic_sound(segment_period_expressed_in_sample_list=target_period_list,
-                                                         params=params)
-        out_sound_periodic_filtered = generate_periodic_filtered_sound(
-            segment_period_expressed_in_sample_list=target_period_list,
-            spectral_envelope_coeffs_list=target_spectral_envelope_coeffs_harmonic_list,
-            params=params)
+        reconstruction = synthesize_voice(feature_list_dict=feature_dict,
+                                          params=params,
+                                          normalize=True)
 
-        reconstruction = out_sound_noise + out_sound_periodic_filtered
-        reconstruction = reconstruction / max(abs(reconstruction))
 
         base_path = "/Users/pierresendorek/"
 
-        write(base_path + "temp/willis_noise.wav", 44100, out_sound_noise / np.max(np.abs(out_sound_noise)))
-        write(base_path + "temp/willis_periodic.wav", 44100, out_sound_periodic / np.max(np.abs(out_sound_periodic)))
-        write(base_path + "temp/willis_out_periodic_filt.wav", 44100,
-              out_sound_periodic_filtered / np.max(np.abs(out_sound_periodic_filtered)))
+        #write(base_path + "temp/willis_noise.wav", 44100, out_sound_noise / np.max(np.abs(out_sound_noise)))
+        #write(base_path + "temp/willis_periodic.wav", 44100, out_sound_periodic / np.max(np.abs(out_sound_periodic)))
+        #write(base_path + "temp/willis_out_periodic_filt.wav", 44100,
+        #      out_sound_periodic_filtered / np.max(np.abs(out_sound_periodic_filtered)))
         write(base_path + "temp/willis_reconstruction.wav", 44100, reconstruction)
 
 

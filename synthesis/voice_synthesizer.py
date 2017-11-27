@@ -104,7 +104,6 @@ def generate_filtered_noise(spectral_envelope_coeffs_list=None, params=None):
         coeffs = spectral_envelope_coeffs_list[i_segment]
         full_spectral_envelope = spectral_envelope_extractor.get_full_spectral_envelope_from_coeffs(coeffs)
 
-
         segment = np.random.randn(segment_len) * sqrt_triangle
         fft_segment = np.fft.fft(segment)
         white_fft_segment = fft_segment / fftconvolve(np.abs(fft_segment), smoother, "same")
@@ -112,5 +111,30 @@ def generate_filtered_noise(spectral_envelope_coeffs_list=None, params=None):
         filtered_segment = np.real(np.fft.ifft(fft_filtered_segment))
         add_to_segment(i_segment=i_segment, source=filtered_segment * sqrt_triangle, dest=sound, n_gap=n_gap)
 
-
     return sound
+
+
+def synthesize_voice(feature_list_dict=None, params=None, normalize=False):
+    assert params is not None
+    assert feature_list_dict is not None
+
+    spectral_envelope_coeffs_harmonic_list = feature_list_dict["spectral_envelope_coeffs_harmonic_list"]
+    spectral_envelope_coeffs_noise_list = feature_list_dict["spectral_envelope_coeffs_noise_list"]
+    period_list = feature_list_dict["period_list"]
+
+    noise_filtered = generate_filtered_noise(spectral_envelope_coeffs_list=spectral_envelope_coeffs_noise_list,
+                                             params=params)
+
+    periodic_filtered = generate_periodic_filtered_sound(segment_period_expressed_in_sample_list=period_list,
+                                                                   spectral_envelope_coeffs_list=spectral_envelope_coeffs_harmonic_list,
+                                                                   params=params)
+
+    reconstruction = noise_filtered + periodic_filtered
+    if normalize:
+        reconstruction = reconstruction / max(abs(reconstruction))
+
+    return reconstruction
+
+
+
+
