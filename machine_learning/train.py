@@ -12,7 +12,7 @@ from database_tools.get_all_files_in_tree import get_file_and_path_list
 
 if __name__ == "__main__":
 
-    batch_size = 10
+    batch_size = 100
     print_loss_smoothing_factor = 1E-2
     n_save_every = 10000
     batch_generator = BatchGenerator(new_protobatch_every=10000000, n_files_protobatch=17)

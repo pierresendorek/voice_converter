@@ -23,7 +23,7 @@ class PairSoundFeature:
 
         assert bw_range_source > 0
         assert fw_range_source > 0
-        assert bw_range_target > 0
+#        assert bw_range_target > 0
 
         self.params = params
         self.voice_feature_extractor = VoiceFeatureExtractor(params=params)

@@ -13,9 +13,10 @@ def get_params():
         "fq_voice_max": 300.0,
         "n_triangle_function": 40,
         "verbose": True,
-        "bw_range_source": 3, # 20
-        "fw_range_source": 3, # 10
-        "bw_range_target": 1} # 20
+        "source_ahead_steps": 3,
+        "bw_range_source": 1, # 20
+        "fw_range_source": 1, # 10
+        "bw_range_target": 2} # 20
 
     params["n_gap"] = params["segment_len"] // 4 # 512 samples @ 44100Hz ~ 0.011 of a second
 
@@ -31,6 +32,7 @@ def get_params():
     triangle[beginning:ending] = np.linspace(1, 0, ending - beginning)
 
     params["triangle_lin_interpol"] = triangle
+
 
     return params
 

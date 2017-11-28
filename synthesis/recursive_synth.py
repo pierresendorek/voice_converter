@@ -38,7 +38,7 @@ class RecursiveSynth:
 
 
         path = os.path.join(params["project_base_path"], "models/bruce_willis/")
-        file_to_open = path + "model.ckpt-70000.meta"
+        file_to_open = path + "model.ckpt-270000.meta"
 
         pprint(file_to_open)
 
@@ -97,7 +97,7 @@ class RecursiveSynth:
             #if i>0:
             #    print(predicted_vector - prev_predicted_vector)
 
-            prev_predicted_vector =  predicted_vector
+            prev_predicted_vector = predicted_vector
             provided_input_list.append(provided_input)
             piecewise_linear_function.add_point(time=i_target, value=predicted_vector[0, 1:])
 
@@ -117,7 +117,7 @@ class RecursiveSynth:
         target_spectral_envelope_coeffs_harmonic_list = []
         target_spectral_envelope_coeffs_noise_list = []
 
-        for i in range(time_target):
+        for i in range(n_time_steps_source):
             feature_vector = deepcopy(piecewise_linear_function.get_value(time=i))
             target_period_list.append(feature_vector[0])
             target_spectral_envelope_coeffs_harmonic_list.append(feature_vector[1:n_triangle_function+1])
@@ -149,7 +149,9 @@ if __name__ == "__main__":
     params = get_params()
     recursive_synth = RecursiveSynth(params=params)
 
-    sound, _ = get_mono_left_channel_sound_and_sampling_frequency("/Users/pierresendorek/projets/voice_converter/data/pierre_sendorek/Studio/3.wav")
+    #f = "/Users/pierresendorek/projets/voice_converter/data/pierre_sendorek/Studio/3.wav"
+    f = "/Users/pierresendorek/temp/pierre_to_convert.wav"
+    sound, _ = get_mono_left_channel_sound_and_sampling_frequency(f)
 
 
     voice_feature_extractor = VoiceFeatureExtractor(params=params)
