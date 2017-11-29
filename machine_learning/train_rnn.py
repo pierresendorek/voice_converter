@@ -20,37 +20,37 @@ if __name__ == "__main__":
     n_save_every = 1000
     batch_generator = BatchGeneratorRnn(new_protobatch_every=10000000, n_files_protobatch=17)
     global_step = tf.Variable(0, trainable=False)
-    starter_learning_rate = 1E-3
+    starter_learning_rate = 1E-2
     decay_rate = 0.1
     decay_steps = 10000
 
-    learning_rate = tf.train.inverse_time_decay(starter_learning_rate,
-                                                global_step=global_step,
-                                                decay_steps=decay_steps,
-                                                decay_rate=decay_rate,
-                                                staircase=False)
+    #learning_rate = tf.train.inverse_time_decay(starter_learning_rate,
+    #                                            global_step=global_step,
+    #                                            decay_steps=decay_steps,
+    #                                            decay_rate=decay_rate,
+    #                                            staircase=False)
 
-    #learning_rate = tf.train.exponential_decay(starter_learning_rate,
-    #                                           global_step=global_step,
-    #                                           decay_steps=decay_steps,
-    #                                           decay_rate=decay_rate,
-    #                                           staircase=False)
+    learning_rate = tf.train.exponential_decay(starter_learning_rate,
+                                               global_step=global_step,
+                                               decay_steps=decay_steps,
+                                               decay_rate=decay_rate,
+                                               staircase=False)
 
 
     # printing params
     print_every = 10
 
     # rnn params
-    rnn_output_transformed_dim = 300
-    feature_extractor_dim = 300
-    num_units_lstm = 40
-    intermediate_dim = 200
-    forget_bias = 0.9
+    rnn_output_transformed_dim = 200
+    feature_extractor_dim = 1000
+    num_units_lstm = 200
+    intermediate_dim = 1000
+    forget_bias = 1.0
 
     # batch params
-    batch_size = 1
+    batch_size = 8
     seq_len = 100
-    steps_ahead = 5
+    steps_ahead = 0
     listen_to_batch = False
 
 

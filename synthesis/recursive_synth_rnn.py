@@ -33,7 +33,7 @@ class RecursiveSynthRnn:
 
 
         path = os.path.join(params["project_base_path"], "models/bruce_willis/")
-        file_to_open = path + "model.ckpt-17000.meta"
+        file_to_open = path + "model.ckpt-42000.meta"
 
         pprint(file_to_open)
 
