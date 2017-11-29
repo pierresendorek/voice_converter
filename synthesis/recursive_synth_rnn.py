@@ -7,7 +7,7 @@ import os
 import numpy as np
 
 from database_tools.sound_file_loader import get_mono_left_channel_sound_and_sampling_frequency
-from feature_extraction.feature_vector_array_to_feature_dict import feature_vector_array_to_feature_dict
+from feature_extraction.feature_vector_array_dict_conversion_helpers import feature_vector_array_to_feature_dict
 from feature_extraction.pair_sequence_feature_target_getter import PairSoundFeature
 from feature_extraction.voice_feature_extractor import VoiceFeatureExtractor
 from params.params import get_params
@@ -33,7 +33,7 @@ class RecursiveSynthRnn:
 
 
         path = os.path.join(params["project_base_path"], "models/bruce_willis/")
-        file_to_open = path + "model.ckpt-4000.meta"
+        file_to_open = path + "model.ckpt-17000.meta"
 
         pprint(file_to_open)
 
@@ -53,20 +53,18 @@ class RecursiveSynthRnn:
         n_triangle_function = self.params["n_triangle_function"]
 
         i_target = 0.0
-
-  #      piecewise_linear_function = PiecewiseLinearFunction(params=params)
-  #      piecewise_linear_function.add_point(time=-1, value=np.abs(np.random.randn(self.params["n_triangle_function"] * 2 + 1)))
-
-        provided_input_list = []
+        print("n_time_steps_source ", n_time_steps_source)
+        feature_source_array = np.zeros(
+            [1, n_time_steps_source, n_triangle_function * 2 + 1])
 
         for i in range(n_time_steps_source):
-            feature_source_array = np.zeros(
-                [2, n_time_steps_source, n_triangle_function * 2 + 1])
 
             # gathering features
             feature_source_array[0, i, 0] = source_sound_features["period_list"][i]
             feature_source_array[0, i, 1: 1 + n_triangle_function] = source_sound_features["spectral_envelope_coeffs_harmonic_list"][i]
             feature_source_array[0, i, 1 + n_triangle_function:1 + 2 * n_triangle_function] = source_sound_features["spectral_envelope_coeffs_noise_list"][i]
+
+
 
         predicted_vectors = self.sess.run(self.output_layer, feed_dict={self.input_placeholder: feature_source_array})
 
@@ -78,6 +76,14 @@ class RecursiveSynthRnn:
         reconstruction = synthesize_voice(feature_list_dict=feature_dict,
                                           params=params,
                                           normalize=True)
+
+        r_source_sound_features = feature_vector_array_to_feature_dict(feature_source_array[0,:,:])
+
+        original = synthesize_voice(feature_list_dict=r_source_sound_features,
+                         params=params,
+                         normalize=True)
+
+        write("/Users/pierresendorek/temp/is_the_phoque.wav", 44100, original)
 
         return reconstruction
 

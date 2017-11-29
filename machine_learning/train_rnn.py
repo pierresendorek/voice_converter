@@ -1,6 +1,6 @@
 from database_tools.parallel_corpus_maker import ParallelCorpusMaker
 from database_tools.parallel_recorder.batch_generator_rnn import BatchGeneratorRnn
-from feature_extraction.feature_vector_array_to_feature_dict import feature_vector_array_to_feature_dict
+from feature_extraction.feature_vector_array_dict_conversion_helpers import feature_vector_array_to_feature_dict
 from machine_learning.recurrent_neural_network import RecurrentNeuralNetwork
 
 from params.params import get_params
@@ -20,7 +20,7 @@ if __name__ == "__main__":
     n_save_every = 1000
     batch_generator = BatchGeneratorRnn(new_protobatch_every=10000000, n_files_protobatch=17)
     global_step = tf.Variable(0, trainable=False)
-    starter_learning_rate = 1E-2
+    starter_learning_rate = 1E-3
     decay_rate = 0.1
     decay_steps = 10000
 
@@ -45,17 +45,17 @@ if __name__ == "__main__":
     feature_extractor_dim = 300
     num_units_lstm = 40
     intermediate_dim = 200
-    forget_bias = 0.95
+    forget_bias = 0.9
 
     # batch params
-    batch_size = 20
+    batch_size = 1
     seq_len = 100
-    steps_ahead = 0
+    steps_ahead = 5
     listen_to_batch = False
 
 
     # loss param
-    burn_in_time = 0
+    burn_in_time = 10
 
     params = get_params()
     parallel_corpus_maker = ParallelCorpusMaker(params)

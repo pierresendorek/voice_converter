@@ -37,6 +37,10 @@ class NeuralNetwork:
         self.loss = cost(self.output_layer - self.expected_output_placeholder)/cost(self.expected_output_placeholder)
 
 
+
+
+
+
     def create_neural_network(self, intermediate_layers_num_output_list=None):
 
         # initialization

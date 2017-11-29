@@ -50,20 +50,26 @@ class RecurrentNeuralNetwork:
     def make_rnn_cell(self, num_units, forget_bias):
         return tf.contrib.rnn.LSTMCell(num_units=num_units,
                                        activation=tf.nn.tanh,
-                                       forget_bias=forget_bias,
-                                       )
+                                       forget_bias=forget_bias)
                                        #kernel_initializer=tf.contrib.layers.xavier_initializer(uniform=False, seed=None, dtype=tf.float32),
                                        #bias_initializer=tf.contrib.layers.xavier_initializer(uniform=False, seed=None, dtype=tf.float32))
 
-    def get_dense_layer(self, input_layer, output_dim, activation=tf.nn.tanh):
-        return dense(inputs=input_layer,
-                     kernel_initializer=xavier_initializer(uniform=False),
-                     bias_initializer=xavier_initializer(uniform=False),
-                     activation=activation,
-                     units=output_dim)
+    def affine_and_transform(self, input_layer, input_dim, output_dim, activation=tf.nn.tanh, name=None):
+        W = tf.Variable(dtype=tf.float32, initial_value=np.random.randn(input_dim, output_dim))
+        b = tf.Variable(dtype=tf.float32, initial_value=np.random.randn(output_dim))
+        if activation is not None:
+            result = tf.add(tf.matmul(input_layer, W), b)
+            result = activation(result, name=name)
+        else:
+            result = tf.add(tf.matmul(input_layer, W), b, name=name)
+        return result
 
-
-
+    def affine_and_transform_last_dim(self, input_layer, input_dim, output_dim, activation=tf.nn.tanh, name=None):
+        batch_size, seq_len, dim = tf.unstack(tf.shape(input_layer))
+        data_reshape = tf.reshape(input_layer, shape=[batch_size * seq_len, dim])
+        data_transform_reshape = self.affine_and_transform(data_reshape, input_dim=input_dim, output_dim=output_dim, activation=activation)
+        data_transform = tf.reshape(data_transform_reshape, shape=[batch_size, seq_len, output_dim], name=name)
+        return data_transform
 
     def create_neural_network_simple(self,
                               input_transformed_dim=None,
@@ -84,15 +90,13 @@ class RecurrentNeuralNetwork:
         input_reshape = tf.reshape(self.input_placeholder, shape=[batch_size_var * max_time_var, self.feature_vector_dim])
 
         # transforming
-        input_transformed_reshape = self.get_dense_layer(input_layer=input_reshape, output_dim=input_transformed_dim)
+        input_transformed_reshape = self.affine_and_transform(input_layer=input_reshape, output_dim=input_transformed_dim)
 
         # scaling the result out of the sigmoid
-        output_reshape = self.get_dense_layer(input_layer=input_transformed_reshape, output_dim=self.feature_vector_dim, activation=None)
+        output_reshape = self.affine_and_transform(input_layer=input_transformed_reshape, output_dim=self.feature_vector_dim, activation=None)
 
         predicted_output = tf.reshape(output_reshape, shape=[batch_size_var, max_time_var, self.feature_vector_dim], name="predicted_output")
         return predicted_output
-
-
 
 
     def create_neural_network(self,
@@ -113,14 +117,11 @@ class RecurrentNeuralNetwork:
         #c_2 = self.make_rnn_cell(num_units)
         #c = tf.contrib.rnn.MultiRNNCell([c_0, c_1])
 
-        batch_size_var, max_time_var, feature_vector_dim_var = tf.unstack(tf.shape(self.input_placeholder))
-
-        input_reshape = tf.reshape(self.input_placeholder, shape=[batch_size_var * max_time_var, self.feature_vector_dim])
-
-        input_transformed_reshape = self.get_dense_layer(input_layer=input_reshape, output_dim=input_transformed_dim)
-
         # The right format for the dynamic_rnn
-        input_transformed = tf.reshape(input_transformed_reshape, [batch_size_var, max_time_var, input_transformed_dim])
+        input_transformed = self.affine_and_transform_last_dim(self.input_placeholder,
+                                                               input_dim=self.feature_vector_dim,
+                                                               output_dim=input_transformed_dim)
+
 
         rnn_output, _ = tf.nn.dynamic_rnn(cell=c_0,
                                           inputs=input_transformed,
@@ -128,27 +129,24 @@ class RecurrentNeuralNetwork:
                                           time_major=False,
                                           dtype=tf.float32)
 
-        rnn_output_reshape = tf.reshape(rnn_output, [batch_size_var * max_time_var, num_units])
-
-        rnn_output_transformed_reshape = self.get_dense_layer(input_layer=rnn_output_reshape, output_dim=rnn_output_transformed_dim)
-        rnn_output_transformed = tf.reshape(rnn_output_transformed_reshape, shape=[batch_size_var, max_time_var, rnn_output_transformed_dim])
-
+        rnn_output_transformed = self.affine_and_transform_last_dim(rnn_output,
+                                                                    input_dim=num_units,
+                                                                    output_dim=rnn_output_transformed_dim)
 
         whole_state = tf.concat([rnn_output_transformed, input_transformed], axis=2)
 
         whole_state_dim = input_transformed_dim + rnn_output_transformed_dim
-        whole_state_reshape = tf.reshape(whole_state, shape=[batch_size_var * max_time_var, whole_state_dim])
 
+        combination = self.affine_and_transform_last_dim(input_layer=whole_state,
+                                                         input_dim=whole_state_dim,
+                                                         output_dim=intermediate_dim)
 
-        # combination of the RNN and the input value
-
-        combination = self.get_dense_layer(input_layer=whole_state, output_dim=intermediate_dim)
-
-        # scaling the result
-        output_reshape = self.get_dense_layer(input_layer=combination, output_dim=self.feature_vector_dim, activation=None)
-
-        # reshaping the result
-        predicted_output = tf.reshape(output_reshape, shape=[batch_size_var, max_time_var, self.feature_vector_dim], name="predicted_output")
+        # Scaling the result
+        predicted_output = self.affine_and_transform_last_dim(input_layer=combination,
+                                                              input_dim=intermediate_dim,
+                                                              output_dim=self.feature_vector_dim,
+                                                              activation=None,
+                                                              name="predicted_output")
 
         return predicted_output
 

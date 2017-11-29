@@ -1,8 +1,7 @@
 from copy import deepcopy
 
 from params.params import get_params
-
-
+import numpy as np
 
 
 
@@ -33,6 +32,19 @@ def feature_vector_array_to_feature_dict(vector_array):
     return {"period_list": period_list,
             "spectral_envelope_coeffs_harmonic_list": harmonic_list,
             "spectral_envelope_coeffs_noise_list": noise_list}
+
+
+def feature_dict_to_feature_array(feature_dict, params):
+    seq_len = len(feature_dict["period_list"])
+    n_triangle_function = params["n_triangle_function"]
+    feature_array = np.zeros([seq_len, n_triangle_function])
+    for i in seq_len:
+        feature_array[i, 0] = feature_dict["period_list"][i]
+        feature_array[i, 1:1+n_triangle_function] = feature_dict["spectral_envelope_coeffs_harmonic_list"][i]
+        feature_array[i, 1+n_triangle_function:] = feature_dict["spectral_envelope_coeffs_noise_list"][i]
+
+    return feature_array
+
 
 
 
