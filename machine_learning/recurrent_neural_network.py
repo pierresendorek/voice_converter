@@ -123,6 +123,7 @@ class RecurrentNeuralNetwork:
                                                                output_dim=input_transformed_dim)
 
 
+
         rnn_output, _ = tf.nn.dynamic_rnn(cell=c_0,
                                           inputs=input_transformed,
                                           initial_state=None,

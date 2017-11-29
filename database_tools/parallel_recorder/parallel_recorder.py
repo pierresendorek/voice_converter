@@ -10,8 +10,8 @@ if __name__ == "__main__":
     params = get_params()
 
 
-    bruce_willis_file_and_path_list = get_file_and_path_list(os.path.join(params["project_base_path"],"data/bruce_willis/FILME"))
-    pierre_sendorek_file_and_path_list = [(os.path.join(params["project_base_path"], "data/pierre_sendorek/FILME"),
+    bruce_willis_file_and_path_list = get_file_and_path_list(os.path.join(params["project_base_path"],"data/bruce_willis/krzysiek"))
+    pierre_sendorek_file_and_path_list = [(os.path.join(params["project_base_path"], "data/pierre_sendorek/krzysiek"),
                                            filename[1]) for filename in bruce_willis_file_and_path_list]
 
     pprint([v[1] for v in bruce_willis_file_and_path_list])

@@ -16,36 +16,39 @@ from scipy.io.wavfile import write
 if __name__ == "__main__":
 
 
-    print_loss_smoothing_factor = 1E-2
     n_save_every = 1000
     batch_generator = BatchGeneratorRnn(new_protobatch_every=10000000, n_files_protobatch=17)
     global_step = tf.Variable(0, trainable=False)
     starter_learning_rate = 1E-2
-    decay_rate = 0.1
-    decay_steps = 10000
+    decay_rate = 1E-4
+    decay_steps = 100000
 
-    #learning_rate = tf.train.inverse_time_decay(starter_learning_rate,
-    #                                            global_step=global_step,
-    #                                            decay_steps=decay_steps,
-    #                                            decay_rate=decay_rate,
-    #                                            staircase=False)
+    learning_rate = tf.train.inverse_time_decay(starter_learning_rate,
+                                                global_step=global_step,
+                                                decay_steps=decay_steps,
+                                                decay_rate=decay_rate,
+                                                staircase=False)
 
-    learning_rate = tf.train.exponential_decay(starter_learning_rate,
-                                               global_step=global_step,
-                                               decay_steps=decay_steps,
-                                               decay_rate=decay_rate,
-                                               staircase=False)
+    #learning_rate = tf.train.exponential_decay(starter_learning_rate,
+    #                                           global_step=global_step,
+    #                                           decay_steps=decay_steps,
+    #                                           decay_rate=decay_rate,
+    #                                           staircase=False)
 
 
     # printing params
     print_every = 10
+    print_loss_smoothing_factor = 1E-3 # parameter for moving average of the loss
 
     # rnn params
-    rnn_output_transformed_dim = 200
-    feature_extractor_dim = 1000
-    num_units_lstm = 200
-    intermediate_dim = 1000
+    rnn_output_transformed_dim = 500
+    feature_extractor_dim = 500
+    num_units_lstm = 500
+    intermediate_dim = 500
     forget_bias = 1.0
+
+    # loss param
+    burn_in_time = 10
 
     # batch params
     batch_size = 8
@@ -53,14 +56,9 @@ if __name__ == "__main__":
     steps_ahead = 0
     listen_to_batch = False
 
-
-    # loss param
-    burn_in_time = 10
-
     params = get_params()
     parallel_corpus_maker = ParallelCorpusMaker(params)
     feature_len = params["n_triangle_function"] * 2 + 1
-
 
     # Initializing neural network and train_op accordingly
     nn = RecurrentNeuralNetwork(params=params,
@@ -83,7 +81,7 @@ if __name__ == "__main__":
 
     gradient_descent_steps_count = 0
 
-    saver = tf.train.Saver(max_to_keep=30, save_relative_paths=True)
+    saver = tf.train.Saver(max_to_keep=1000, save_relative_paths=True)
 
 
     for iteration in range(1000000000):

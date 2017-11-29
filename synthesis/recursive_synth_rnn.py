@@ -33,7 +33,7 @@ class RecursiveSynthRnn:
 
 
         path = os.path.join(params["project_base_path"], "models/bruce_willis/")
-        file_to_open = path + "model.ckpt-42000.meta"
+        file_to_open = path + "model.ckpt-150000.meta"
 
         pprint(file_to_open)
 
@@ -79,11 +79,11 @@ class RecursiveSynthRnn:
 
         r_source_sound_features = feature_vector_array_to_feature_dict(feature_source_array[0,:,:])
 
-        original = synthesize_voice(feature_list_dict=r_source_sound_features,
-                         params=params,
-                         normalize=True)
+        #original = synthesize_voice(feature_list_dict=r_source_sound_features,
+        #                 params=params,
+        #                 normalize=True)
 
-        write("/Users/pierresendorek/temp/is_the_phoque.wav", 44100, original)
+        #write("/Users/pierresendorek/temp/is_the_phoque.wav", 44100, original)
 
         return reconstruction
 
