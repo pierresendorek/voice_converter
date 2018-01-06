@@ -20,7 +20,7 @@ if __name__ == "__main__":
     batch_generator = BatchGeneratorRnn(new_protobatch_every=10000000, n_files_protobatch=17)
     global_step = tf.Variable(0, trainable=False)
     starter_learning_rate = 1E-2
-    decay_rate = 1E-4
+    decay_rate = 1E-2
     decay_steps = 100000
 
     learning_rate = tf.train.inverse_time_decay(starter_learning_rate,
@@ -41,17 +41,17 @@ if __name__ == "__main__":
     print_loss_smoothing_factor = 1E-3 # parameter for moving average of the loss
 
     # rnn params
-    rnn_output_transformed_dim = 500
-    feature_extractor_dim = 500
-    num_units_lstm = 500
-    intermediate_dim = 500
+    rnn_output_transformed_dim = 1000
+    feature_extractor_dim = 1000
+    num_units_lstm = 200
+    intermediate_dim = 1000
     forget_bias = 1.0
 
     # loss param
     burn_in_time = 10
 
     # batch params
-    batch_size = 8
+    batch_size = 2
     seq_len = 100
     steps_ahead = 0
     listen_to_batch = False

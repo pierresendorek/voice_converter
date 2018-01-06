@@ -54,8 +54,8 @@ class RecurrentNeuralNetwork:
                                        #kernel_initializer=tf.contrib.layers.xavier_initializer(uniform=False, seed=None, dtype=tf.float32),
                                        #bias_initializer=tf.contrib.layers.xavier_initializer(uniform=False, seed=None, dtype=tf.float32))
 
-    def affine_and_transform(self, input_layer, input_dim, output_dim, activation=tf.nn.tanh, name=None):
-        W = tf.Variable(dtype=tf.float32, initial_value=np.random.randn(input_dim, output_dim))
+    def affine_and_transform(self, input_layer, input_dim, output_dim, activation=tf.nn.tanh, name=None, mult_w=1.0):
+        W = tf.Variable(dtype=tf.float32, initial_value=mult_w * np.random.randn(input_dim, output_dim))
         b = tf.Variable(dtype=tf.float32, initial_value=np.random.randn(output_dim))
         if activation is not None:
             result = tf.add(tf.matmul(input_layer, W), b)
@@ -64,10 +64,11 @@ class RecurrentNeuralNetwork:
             result = tf.add(tf.matmul(input_layer, W), b, name=name)
         return result
 
-    def affine_and_transform_last_dim(self, input_layer, input_dim, output_dim, activation=tf.nn.tanh, name=None):
+
+    def affine_and_transform_last_dim(self, input_layer, input_dim, output_dim, activation=tf.nn.tanh, name=None, mult_w=1.0):
         batch_size, seq_len, dim = tf.unstack(tf.shape(input_layer))
         data_reshape = tf.reshape(input_layer, shape=[batch_size * seq_len, dim])
-        data_transform_reshape = self.affine_and_transform(data_reshape, input_dim=input_dim, output_dim=output_dim, activation=activation)
+        data_transform_reshape = self.affine_and_transform(data_reshape, input_dim=input_dim, output_dim=output_dim, activation=activation, mult_w=mult_w)
         data_transform = tf.reshape(data_transform_reshape, shape=[batch_size, seq_len, output_dim], name=name)
         return data_transform
 
@@ -90,7 +91,11 @@ class RecurrentNeuralNetwork:
         input_reshape = tf.reshape(self.input_placeholder, shape=[batch_size_var * max_time_var, self.feature_vector_dim])
 
         # transforming
-        input_transformed_reshape = self.affine_and_transform(input_layer=input_reshape, output_dim=input_transformed_dim)
+        input_transformed_reshape = tf.layers.dense(input_reshape,
+                                                    units=input_transformed_dim,
+                                                    activation=tf.nn.relu6,
+                                                    kernel_initializer=xavier_initializer())
+        # input_transformed_reshape = self.affine_and_transform(input_layer=input_reshape, output_dim=input_transformed_dim)
 
         # scaling the result out of the sigmoid
         output_reshape = self.affine_and_transform(input_layer=input_transformed_reshape, output_dim=self.feature_vector_dim, activation=None)
@@ -120,7 +125,8 @@ class RecurrentNeuralNetwork:
         # The right format for the dynamic_rnn
         input_transformed = self.affine_and_transform_last_dim(self.input_placeholder,
                                                                input_dim=self.feature_vector_dim,
-                                                               output_dim=input_transformed_dim)
+                                                               output_dim=input_transformed_dim,
+                                                               mult_w=1E-4)
 
 
 
@@ -132,7 +138,8 @@ class RecurrentNeuralNetwork:
 
         rnn_output_transformed = self.affine_and_transform_last_dim(rnn_output,
                                                                     input_dim=num_units,
-                                                                    output_dim=rnn_output_transformed_dim)
+                                                                    output_dim=rnn_output_transformed_dim,
+                                                                    mult_w=1E-4)
 
         whole_state = tf.concat([rnn_output_transformed, input_transformed], axis=2)
 
@@ -140,7 +147,8 @@ class RecurrentNeuralNetwork:
 
         combination = self.affine_and_transform_last_dim(input_layer=whole_state,
                                                          input_dim=whole_state_dim,
-                                                         output_dim=intermediate_dim)
+                                                         output_dim=intermediate_dim,
+                                                         mult_w=1E-4)
 
         # Scaling the result
         predicted_output = self.affine_and_transform_last_dim(input_layer=combination,
