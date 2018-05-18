@@ -64,14 +64,13 @@ class BatchGenerator:
 
 
         source_batch = self.source_feature_protobatch[i_sample_list, :]
-
-
         target_batch = self.target_feature_protobatch[i_sample_list, :]
 
         self.n_batch_generated_since_last_protobatch_generation += 1
         self.n_batch_generated_since_last_protobatch_generation = self.n_batch_generated_since_last_protobatch_generation % self.new_protobatch_every
 
-        return {"source_batch": source_batch, "target_batch": target_batch}
+        return {"source_batch": source_batch,
+                "target_batch": target_batch}
 
 
 

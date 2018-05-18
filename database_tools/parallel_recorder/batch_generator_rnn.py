@@ -77,7 +77,6 @@ class BatchGeneratorRnn:
             target_batch[i_batch, :, :] = self.target_feature_protobatch[i_time_start: i_time_end, :]
             i_batch += 1
 
-
         self.n_batch_generated_since_last_protobatch_generation += 1
         self.n_batch_generated_since_last_protobatch_generation = self.n_batch_generated_since_last_protobatch_generation % self.new_protobatch_every
 

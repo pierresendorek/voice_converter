@@ -16,7 +16,8 @@ def get_params():
         "source_ahead_steps": 3,
         "bw_range_source": 1, # 20
         "fw_range_source": 1, # 10
-        "bw_range_target": 2} # 20
+        "bw_range_target": 2,
+        "use_gpu":False} # 20
 
     params["n_gap"] = params["segment_len"] // 4 # 512 samples @ 44100Hz ~ 0.011 of a second
 

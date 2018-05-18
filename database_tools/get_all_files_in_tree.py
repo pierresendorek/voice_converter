@@ -31,7 +31,6 @@ import os
 
 if __name__ == "__main__":
 
-
     params = get_params()
     project_base_path = params["project_base_path"]
     full_file_paths = get_file_and_path_list(os.path.join(project_base_path, "data/bruce_willis/Studio"))

@@ -17,7 +17,7 @@ from synthesis.voice_synthesizer import generate_filtered_noise, generate_period
 
 from scipy.io.wavfile import write
 from pprint import pprint
-
+import pickle
 
 class RecursiveSynthRnn:
 
@@ -30,10 +30,14 @@ class RecursiveSynthRnn:
         self.sess = tf.InteractiveSession()
         self.sess.run(tf.global_variables_initializer())
 
+        self.vector_normalizer_source = pickle.load(open(os.path.join(params["project_base_path"],
+                                                                      "models/vector_normalizer_source.pickle"), "rb"))
+        self.vector_normalizer_target = pickle.load(open(os.path.join(params["project_base_path"],
+                                                                      "models/vector_normalizer_target.pickle"), "rb"))
 
 
         path = os.path.join(params["project_base_path"], "models/bruce_willis/")
-        file_to_open = path + "model.ckpt-150000.meta"
+        file_to_open = path + "model.ckpt-23000.meta"
 
         pprint(file_to_open)
 
@@ -65,8 +69,15 @@ class RecursiveSynthRnn:
             feature_source_array[0, i, 1 + n_triangle_function:1 + 2 * n_triangle_function] = source_sound_features["spectral_envelope_coeffs_noise_list"][i]
 
 
+        mu_source, sigma2_source = self.vector_normalizer_source.get_mu_sigma2()
+        mu_target, sigma2_target = self.vector_normalizer_target.get_mu_sigma2()
+
+        feature_source_array = (feature_source_array - mu_source) / (2 * np.sqrt(sigma2_source))
 
         predicted_vectors = self.sess.run(self.output_layer, feed_dict={self.input_placeholder: feature_source_array})
+
+
+        predicted_vectors = predicted_vectors * 2 * np.sqrt(sigma2_target) + mu_target
 
         feature_dict = feature_vector_array_to_feature_dict(predicted_vectors[0, :, :])
 

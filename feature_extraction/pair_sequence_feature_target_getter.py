@@ -37,6 +37,7 @@ class PairSoundFeature:
     def get_feature_length(self):
         return self.feature_length
 
+    #
     def get_sound_pair_features(self, source_path=None, target_path=None):
 
         source_sound, _ = get_mono_left_channel_sound_and_sampling_frequency(filename=source_path)
