@@ -31,8 +31,8 @@ class VoiceFeatureExtractor:
             x_apodized = x * apowin2
             period = self.pitch_extractor.estimate_period(x_apodized)
             periodic, noise = self.period_and_noise_separator.separate_components(x_apodized=x_apodized, period=period)
-            spectral_envelope_coeffs_periodic = self.spectral_envelope_extractor.get_spectral_envelope_coeffs(periodic)
-            spectral_envelope_coeffs_noise = self.spectral_envelope_extractor.get_spectral_envelope_coeffs(noise)
+            spectral_envelope_coeffs_periodic = self.spectral_envelope_extractor.get_coeffs(periodic)
+            spectral_envelope_coeffs_noise = self.spectral_envelope_extractor.get_coeffs(noise)
 
             spectral_envelope_coeffs_noise_list.append(spectral_envelope_coeffs_noise)
             spectral_envelope_coeffs_harmonic_list.append(spectral_envelope_coeffs_periodic)

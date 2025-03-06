@@ -6,13 +6,14 @@ from scipy.sparse import linalg
 import scipy.io.wavfile
 import os
 from common.count_segments import count_segments
+from feature_extraction.new_feature_extractor import Parameters
 
 package_directory = os.path.dirname(os.path.abspath(__file__))
 
 # This class contains all variables needed for sound analysis, as well as methods for extracting features.
 class SpectralEnvelopeExtractor:
 
-    def __init__(self, params):
+    def __init__(self, params:Parameters):
 
         self.params = params
 
@@ -22,13 +23,12 @@ class SpectralEnvelopeExtractor:
         # nFFT is the number samples taken to slice the audio into chunks for FFT analysis
         # When the sampling frequency is the default 44100, nFFT is 2048.
         # When the sampling rate is lower/higher, nFFT will be lower/higher.
-        self.nFFT = params["segment_len"]
+        self.nFFT = params.segment_len
 
         # Gap between slices of the audio
-        self.nGap = params["n_gap"]
 
-        self.apowin = params["apowin"]
-        self.apowin2 = params["apowin2"]
+        
+        
 
 
         self.fq_elem_func_min = params["fq_elem_func_min"]
@@ -95,7 +95,7 @@ class SpectralEnvelopeExtractor:
         spectrum = abs_fft_x_apodized[0:int(self.nFFT // 2)]
         return spectrum
 
-    def get_spectral_envelope_coeffs(self, x_apodized=None):
+    def get_coeffs(self, x_apodized=None):
         """
         :param x_apodized: sound segment multiplied by apowin2
         :return: average energy per frequency band
@@ -105,7 +105,6 @@ class SpectralEnvelopeExtractor:
         return spectral_envelope_coeffs
 
     def get_spectral_enveloppe_from_coeffs(self, spectral_envelope_coeffs):
-
         return lsqr(self.triangle_window_matrix.T, spectral_envelope_coeffs, damp=1E-9)[0]
 
 
@@ -128,7 +127,7 @@ class SpectralEnvelopeExtractor:
         for i_segment in range(n_segment):
             x = get_segment(sound=sound, i_segment=i_segment, params=self.params)
             x_apodized = x * apowin2
-            spectral_envelope_coeffs = self.get_spectral_envelope_coeffs(x_apodized)
+            spectral_envelope_coeffs = self.get_coeffs(x_apodized)
             spectral_envelope_coeffs_list.append(spectral_envelope_coeffs)
 
         return spectral_envelope_coeffs_list
