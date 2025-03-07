@@ -2,7 +2,7 @@ import numpy as np
 from scipy.sparse import linalg
 
 from feature_extraction.common_arrays import CommonArrays
-from feature_extraction.new_feature_extractor import Parameters
+from feature_extraction.parameters import Parameters
 
 
 class PitchEstimator:

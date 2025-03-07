@@ -3,7 +3,8 @@ from scipy.sparse import bsr_matrix
 from scipy.sparse.linalg import lsqr
 import numpy as np
 
-from feature_extraction.new_feature_extractor import Parameters
+from feature_extraction.common_arrays import CommonArrays
+from feature_extraction.parameters import Parameters
 from logging import Logger
 
 
@@ -15,13 +16,14 @@ class PeriodicAndNoiseSeparator:
 
         
         self.params = params
+        self.common_arrays = CommonArrays(params)
         
         # table of regularly spaced periods (expressed in number of samples)
         # Each time delay in this vector is a candidate period
         self.period_list = np.arange(params.period_min, params.period_max)
 
         # corresponding frequencies for the table of regularly spaced periods
-        self.frequency_list = np.array(self.sampling_frequency / self.period_list)
+        self.frequency_list = np.array(self.params.sampling_frequency / self.period_list)
 
         self.periodic_function_basis_dict = {}
         logger.info("Initializing periodic function basis for all periods...")
@@ -39,7 +41,7 @@ class PeriodicAndNoiseSeparator:
         :return: the matrix A, in sparse format
         """
 
-        n_row = self.segment_len
+        n_row = self.params.segment_len
         n_col = period
         # A = np.zeros((n_row, n_col))
         i = []
@@ -51,7 +53,7 @@ class PeriodicAndNoiseSeparator:
                 # A[k * period + phi, phi] = 1
                 i.append(k * period + phi)
                 j.append(phi)
-                data.append(self.apowin2[k * period + phi])
+                data.append(self.common_arrays.apowin2[k * period + phi])
                 k += 1
 
         # data = np.ones(len(i))
