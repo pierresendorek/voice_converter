@@ -3,7 +3,7 @@ from scipy.signal import fftconvolve
 
 from database_tools.segment_setter import add_to_segment
 from database_tools.sound_file_loader import get_segment
-from feature_extraction.spectral_enveloppe_extractor import SpectralEnvelopeExtractor
+from feature_extraction.spectral_envelope import SpectralEnvelopeExtractor
 
 
 def saw(x):

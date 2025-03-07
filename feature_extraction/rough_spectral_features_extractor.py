@@ -1,4 +1,4 @@
-from feature_extraction.spectral_enveloppe_extractor import SpectralEnvelopeExtractor
+from feature_extraction.spectral_envelope import SpectralEnvelopeExtractor
 from copy import deepcopy
 from common.get_element_from_list import get_element_from_list_constant_outside, get_element_from_list_zero_outside
 import numpy as np

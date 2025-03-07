@@ -1,6 +1,6 @@
 from database_tools.sound_file_loader import get_mono_left_channel_sound_and_sampling_frequency
 
-from feature_extraction.spectral_enveloppe_extractor import SpectralEnvelopeExtractor
+from feature_extraction.spectral_envelope import SpectralEnvelopeExtractor
 from params.params import get_params
 import os
 

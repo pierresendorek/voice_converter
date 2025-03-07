@@ -1,6 +1,7 @@
 import numpy as np
 from scipy.sparse import linalg
 
+from feature_extraction.common_arrays import CommonArrays
 from feature_extraction.new_feature_extractor import Parameters
 
 
@@ -9,8 +10,10 @@ class PitchEstimator:
     def __init__(self, params: Parameters):
         self.params = params
 
-        self.apowin = np.sin(np.linspace(0, np.pi, num=self.segment_len, endpoint=False))
-        self.apowin2 = self.apowin ** 2
+        common_arrays = CommonArrays(params)
+
+        self.apowin = common_arrays.apowin
+        self.apowin2 = common_arrays.apowin2
 
         # Gap between slices of the audio
 
@@ -30,11 +33,11 @@ class PitchEstimator:
         self.diff_for_period = np.zeros(self.period_max - self.period_min)
 
 
-    def estimate_period(self, x):
+    def estimate_period(self, x:np.ndarray) -> int:
         return self.estimate_period_least_difference_FFT(x)
 
 
-    def estimate_period_least_difference_FFT(self, x):
+    def estimate_period_least_difference_FFT(self, x) -> int:
         """
         Returns the period as an amount of samples
         :param self:

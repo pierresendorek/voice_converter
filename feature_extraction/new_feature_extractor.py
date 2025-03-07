@@ -1,9 +1,11 @@
 import numpy as np
 
+from feature_extraction.common_arrays import CommonArrays
 from feature_extraction.periodic_and_noise_separator import PeriodicAndNoiseSeparator
 from feature_extraction.pitch_estimator import PitchEstimator
-from feature_extraction.spectral_enveloppe_extractor import SpectralEnvelopeExtractor
+from feature_extraction.spectral_envelope import SpectralEnvelopeExtractor
 from typing import List
+
 
 class Parameters:
     def __init__(self):
@@ -20,7 +22,11 @@ class Parameters:
     
     def __post_init__(self):
         self.n_gap = self.segment_len // 4
-
+        
+        
+        # corresponding range of periods (expressed in number of samples)
+        self.period_min = round(self.sampling_frequency / self.fq_voice_max)
+        self.period_max = round(self.sampling_frequency / self.fq_voice_min)
 
 
 # def triangle(n_gap, segment_len, n_triangle_function):
@@ -47,12 +53,7 @@ class Feature:
 
     def numpy(self):
         return np.concatenate([np.array([self.period]), self.spectral_envelope_coeffs_harmonic, self.spectral_envelope_coeffs_noise])
-    
-
-
-
         
-
 
 def extract_features(sound: np.ndarray, params: Parameters):
         
@@ -64,7 +65,7 @@ def extract_features(sound: np.ndarray, params: Parameters):
 
     features: List[Feature] = []
 
-    for i_x, x in enumerate(sound_segments_iterator(sound, params.segment_len, n_gap)):
+    for i_x, x in enumerate(sound_segments_iterator(sound, params.segment_len, params.n_gap)):
         
         x_apodized = x * common_arrays.apowin2
         period = pitch_estimator.estimate_period(x_apodized)
@@ -75,3 +76,15 @@ def extract_features(sound: np.ndarray, params: Parameters):
         features.append(Feature(period, spectral_envelope_coeffs_periodic, spectral_envelope_coeffs_noise))
 
     return features
+
+
+if __name__ == "__main__":
+
+    from argparse import ArgumentParser
+    from pathlib import Path
+    from scipy.io import wavfile
+
+    parser = ArgumentParser()
+    parser.add_argument("sound_file", type=Path)
+    args = parser.parse_args()
+
