@@ -1,14 +1,7 @@
 import numpy as np
 
-def set_segment(i_segment=None, source=None, dest=None, n_gap=None):
-    i_start = n_gap * i_segment
-    i_end = i_start + source.shape[0]
 
-    if i_start >= 0 and i_end < dest.len:
-        dest[i_start:i_end] = source
-
-
-def add_to_segment(i_segment=None, source=None, dest=None, n_gap=None):
+def add_to_segment(i_segment:int, source:np.ndarray, dest:np.ndarray, n_gap:int):
     i_start = n_gap * i_segment
     i_end = i_start + source.shape[0]
 

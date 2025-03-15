@@ -14,9 +14,10 @@ class Parameters:
         self.verbose = True
         self.use_gpu = False
 
-        ######################
-        # computed attributes
-        ######################
+        self.compute_remaining_parameters()
+
+
+    def compute_remaining_parameters(self):
         self.n_gap = self.segment_len // 4
         # corresponding range of periods (expressed in number of samples)
         self.period_min = round(self.sampling_frequency / self.fq_voice_max)

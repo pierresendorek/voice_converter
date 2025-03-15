@@ -69,15 +69,16 @@ if __name__ == "__main__":
     from scipy.io import wavfile
 
     parser = ArgumentParser()
-    parser.add_argument("sound_file", type=Path)
+    parser.add_argument("input_sound_file", type=Path)
+    parser.add_argument("output_features_file", type=Path)
     args = parser.parse_args()
 
-    fs, x = wavfile.read(args.sound_file)
+    fs, x = wavfile.read(args.input_sound_file)
     
     if x.shape[1] == 2:
         x = x[:, 0]
 
-    features = extract_features(x, Parameters())
+    features = extract_features_as_np_array(x, Parameters())
 
-    for feature in features:
-        print(feature.numpy())
+    np.save(args.output_features_file, features)
+

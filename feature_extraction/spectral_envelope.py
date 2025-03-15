@@ -13,9 +13,7 @@ package_directory = os.path.dirname(os.path.abspath(__file__))
 
 # This class contains all variables needed for sound analysis, as well as methods for extracting features.
 class SpectralEnvelopeExtractor:
-
     def __init__(self, params:Parameters):
-
         self.params = params
         self.common_arrays = CommonArrays(params)
 
@@ -26,7 +24,6 @@ class SpectralEnvelopeExtractor:
         self.nFFT = params.segment_len
 
         # Gap between slices of the audio
-
         self.fq_elem_func = np.exp(np.linspace(np.log(params.fq_elem_func_min),
                                                np.log(params.fq_elem_func_max),
                                                params.n_triangle_function + 2))
@@ -97,19 +94,12 @@ class SpectralEnvelopeExtractor:
         return spectral_envelope_coeffs
 
     
-
-class SpectralEnvelopeFilter:
-    def __init__(self, params:Parameters):
-        self.params = params
-        self.common_arrays = CommonArrays(params)
-        self.spectral_envelope_extractor = SpectralEnvelopeExtractor(params=params)
-
     def get_half_spectral_enveloppe_from_coeffs(self, spectral_envelope_coeffs):
         return lsqr(self.triangle_window_matrix.T, spectral_envelope_coeffs, damp=1E-9)[0]
 
     def get_full_spectral_envelope_from_coeffs(self, spectal_envelope_coeffs):
         half_spectral_envelope = self.get_half_spectral_enveloppe_from_coeffs(spectal_envelope_coeffs)
-        full_spectral_envelope = np.zeros(self.nFFT)
+        full_spectral_envelope = np.zeros(self.params.segment_len)
         full_spectral_envelope[0:self.nFFT//2] = half_spectral_envelope
         full_spectral_envelope[self.nFFT//2:self.nFFT] = half_spectral_envelope[::-1]
         return full_spectral_envelope
