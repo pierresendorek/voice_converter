@@ -4,26 +4,39 @@ from scipy.signal import fftconvolve
 from database_tools.segment_setter import add_to_segment
 from database_tools.sound_file_loader import get_segment
 from feature_extraction.spectral_envelope import SpectralEnvelopeExtractor
+from common.parameters import Parameters
 
 
 def saw(x):
     return x - np.round(x)
 
 
-def generate_sawtooth_sound(instantaneous_frequency_in_hertz=None, params=None):
-    # TODO : la division par 2 est un quickfix : voir comment l'enlever
+def generate_sawtooth_sound(instantaneous_frequency_in_hertz:float, params:Parameters):
     frequency = instantaneous_frequency_in_hertz
-    sampling_frequency = params["sampling_frequency"]
-    phase = np.cumsum(frequency / sampling_frequency)
-    sawtooth = saw(phase)
+    sampling_frequency = params.sampling_frequency
+    # TODO: ne pas utiliser cumsum
+    #phase = np.cumsum(frequency / sampling_frequency)
+    sawtooth = cumsaw(frequency / sampling_frequency)
     return sawtooth
 
 
-def get_instantenous_frequency_array(segment_period_in_sample_list, params=None):
-    sampling_frequency = params["sampling_frequency"]
-    segment_len = params["segment_len"]
-    n_gap = params["n_gap"]
-    triangle = params["triangle_lin_interpol"]
+def cumsaw(normalized_frequency:np.ndarray):
+    exp_phase = np.exp(2j * np.pi * 0.0)
+    phases = []
+    for f in normalized_frequency:
+        exp_phase *= np.exp(1j * 2 * np.pi * f)
+        phases.append(np.real(np.log(exp_phase) / (1j * np.pi))) # so the signal is between -1 and 1
+    return np.array(phases)
+        
+
+
+
+
+def get_instantenous_frequency_array(segment_period_in_sample_list, params:Parameters):
+    sampling_frequency = params.sampling_frequency
+    segment_len = params.segment_len
+    n_gap = params.n_gap
+    triangle = params.triangle_lin_interpol
 
     inst_fq = np.zeros(n_gap * len(segment_period_in_sample_list) + segment_len)
 

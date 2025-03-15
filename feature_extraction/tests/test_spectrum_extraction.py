@@ -7,7 +7,7 @@ from common.count_segments import count_segments
 from database_tools.sound_file_loader import get_segment
 import matplotlib.pyplot as plt
 import numpy as np
-from feature_extraction.voice_feature_extractor import voice_feature_extractor
+from feature_extraction.old_voice_feature_extractor import voice_feature_extractor
 
 
 params = get_params()

@@ -1,5 +1,5 @@
 import numpy as np
-from feature_extraction.parameters import Parameters
+from common.parameters import Parameters
 
 class CommonArrays:
     def __init__(self, params: Parameters):

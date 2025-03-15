@@ -4,7 +4,7 @@ from scipy.sparse.linalg import lsqr
 import numpy as np
 
 from feature_extraction.common_arrays import CommonArrays
-from feature_extraction.parameters import Parameters
+from common.parameters import Parameters
 from logging import Logger
 
 

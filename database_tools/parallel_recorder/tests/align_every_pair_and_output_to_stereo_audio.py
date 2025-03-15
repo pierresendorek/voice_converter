@@ -9,7 +9,7 @@ from params.params import get_params
 import numpy as np
 from common.math.piecewise_linear_function import PiecewiseLinearFunction
 from pprint import pprint
-from feature_extraction.voice_feature_extractor import VoiceFeatureExtractor
+from feature_extraction.old_voice_feature_extractor import VoiceFeatureExtractor
 from synthesis.voice_synthesizer import synthesize_voice
 from scipy.io import wavfile
 

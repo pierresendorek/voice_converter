@@ -5,8 +5,7 @@ from feature_extraction.periodic_and_noise_separator import PeriodicAndNoiseSepa
 from feature_extraction.pitch_estimator import PitchEstimator
 from feature_extraction.spectral_envelope import SpectralEnvelopeExtractor
 from typing import List
-from feature_extraction.parameters import Parameters
-
+from common.parameters import Parameters
 
 
 
@@ -27,16 +26,14 @@ class Feature:
         return np.concatenate([np.array([self.period]), self.spectral_envelope_coeffs_harmonic, self.spectral_envelope_coeffs_noise])
         
 
-def extract_features(sound: np.ndarray, params: Parameters):
-        
+def extract_features(sound: np.ndarray, params: Parameters):        
     common_arrays = CommonArrays(params)
         
     pitch_estimator = PitchEstimator(params)
     periodic_and_noise_separator = PeriodicAndNoiseSeparator(params)
     spectral_envelope_extractor = SpectralEnvelopeExtractor(params)
 
-
-    for i_x, x in enumerate(sound_segments_iterator(sound, params.segment_len, params.n_gap)):
+    for x in sound_segments_iterator(sound, params.segment_len, params.n_gap):
         
         x_apodized = x * common_arrays.apowin2
         period = pitch_estimator.estimate_period(x_apodized)
@@ -66,6 +63,6 @@ if __name__ == "__main__":
         x = x[:, 0]
 
     features = extract_features(x, Parameters())
-    
+
     for feature in features:
         print(feature.numpy())

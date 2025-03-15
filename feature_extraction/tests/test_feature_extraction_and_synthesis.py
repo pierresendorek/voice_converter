@@ -19,7 +19,7 @@ filename = os.path.join(params["project_base_path"], "data/bruce_willis/Studio/1
 sound, sampling_frequency = get_mono_left_channel_sound_and_sampling_frequency(filename)
 
 
-from feature_extraction.voice_feature_extractor import VoiceFeatureExtractor
+from feature_extraction.old_voice_feature_extractor import VoiceFeatureExtractor
 
 voice_feature_extractor = VoiceFeatureExtractor(params)
 
