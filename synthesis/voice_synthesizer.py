@@ -7,20 +7,17 @@ from feature_extraction.spectral_envelope import SpectralEnvelopeExtractor
 from common.parameters import Parameters
 
 
-def saw(x):
-    return x - np.round(x)
-
 
 def generate_sawtooth_sound(instantaneous_frequency_in_hertz:float, params:Parameters):
     frequency = instantaneous_frequency_in_hertz
     sampling_frequency = params.sampling_frequency
     # TODO: ne pas utiliser cumsum
     #phase = np.cumsum(frequency / sampling_frequency)
-    sawtooth = cumsaw(frequency / sampling_frequency)
+    sawtooth = cumulative_saw(frequency / sampling_frequency)
     return sawtooth
 
 
-def cumsaw(normalized_frequency:np.ndarray):
+def cumulative_saw(normalized_frequency:np.ndarray):
     exp_phase = np.exp(2j * np.pi * 0.0)
     phases = []
     for f in normalized_frequency:
@@ -28,8 +25,6 @@ def cumsaw(normalized_frequency:np.ndarray):
         phases.append(np.real(np.log(exp_phase) / (1j * np.pi))) # so the signal is between -1 and 1
     return np.array(phases)
         
-
-
 
 
 def get_instantenous_frequency_array(segment_period_in_sample_list, params:Parameters):
@@ -95,20 +90,18 @@ def generate_periodic_filtered_sound(segment_period_expressed_in_sample_list=Non
     return filtered_sawtooth
 
 
-def generate_filtered_noise(spectral_envelope_coeffs_list=None, params=None):
+def generate_filtered_noise(spectral_envelope_coeffs:np.ndarray, params:Parameters):
 
-    n_gap = params["n_gap"]
-    segment_len = params["segment_len"]
     triangle = params["triangle_lin_interpol"]
     sqrt_triangle = np.sqrt(triangle)
 
     spectral_envelope_extractor = SpectralEnvelopeExtractor(params)
 
-    sound_len = len(spectral_envelope_coeffs_list) * n_gap + segment_len
+    sound_len = spectral_envelope_coeffs.size[0] * params.n_gap + params.segment_len
 
     sound = np.zeros(sound_len)
 
-    n_gap = params["n_gap"]
+    
     smoother = np.ones(params["segment_len"] // 256)
 
 
@@ -127,19 +120,21 @@ def generate_filtered_noise(spectral_envelope_coeffs_list=None, params=None):
     return sound
 
 
-def synthesize_voice(feature_list_dict=None, params=None, normalize=False):
-    assert params is not None
-    assert feature_list_dict is not None
+def synthesize_voice(features:np.ndarray, params:Parameters, normalize:bool):
+    """
+    features: np.ndarray of shape (n_segments, n_features = 1+2 * n_triangle_function)
+    """
+    
+    periods = features[:, 0]
+    spectral_envelope_coeffs_harmonic = features[:,1:1 + params.n_triangle_function]
+    spectral_envelope_coeffs_noise = features[:,1+2 * params.n_triangle_function:]
+    
 
-    spectral_envelope_coeffs_harmonic_list = feature_list_dict["spectral_envelope_coeffs_harmonic_list"]
-    spectral_envelope_coeffs_noise_list = feature_list_dict["spectral_envelope_coeffs_noise_list"]
-    period_list = feature_list_dict["period_list"]
-
-    noise_filtered = generate_filtered_noise(spectral_envelope_coeffs_list=spectral_envelope_coeffs_noise_list,
+    noise_filtered = generate_filtered_noise(spectral_envelope_coeffs=spectral_envelope_coeffs_noise,
                                              params=params)
 
-    periodic_filtered = generate_periodic_filtered_sound(segment_period_expressed_in_sample_list=period_list,
-                                                                   spectral_envelope_coeffs_list=spectral_envelope_coeffs_harmonic_list,
+    periodic_filtered = generate_periodic_filtered_sound(segment_periods_expressed_in_sample=periods,
+                                                                   spectral_envelope_coeffs=spectral_envelope_coeffs_harmonic,
                                                                    params=params)
 
     reconstruction = noise_filtered + periodic_filtered

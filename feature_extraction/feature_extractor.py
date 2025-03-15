@@ -17,16 +17,27 @@ def sound_segments_iterator(sound, segment_len, n_gap):
 
 
 class Feature:
-    def __init__(self, period, spectral_envelope_coeffs_harmonic, spectral_envelope_coeffs_noise):
+    def __init__(self, 
+                 period, 
+                 spectral_envelope_coeffs_harmonic, 
+                 spectral_envelope_coeffs_noise):
         self.period = period
         self.spectral_envelope_coeffs_harmonic = spectral_envelope_coeffs_harmonic
         self.spectral_envelope_coeffs_noise = spectral_envelope_coeffs_noise
 
-    def numpy(self):
-        return np.concatenate([np.array([self.period]), self.spectral_envelope_coeffs_harmonic, self.spectral_envelope_coeffs_noise])
+    @classmethod
+    def from_numpy(cls, features:np.ndarray, params:Parameters):
+        return cls(period=features[0], 
+                   spectral_envelope_coeffs_harmonic=features[1:1+params.n_triangle_function], 
+                   spectral_envelope_coeffs_noise=features[1+params.n_triangle_function:])
+
+    def numpy(self) -> np.ndarray:
+        return np.concatenate([np.array([self.period]), 
+                               self.spectral_envelope_coeffs_harmonic, 
+                               self.spectral_envelope_coeffs_noise])
         
 
-def extract_features(sound: np.ndarray, params: Parameters):        
+def extract_features(sound: np.ndarray, params: Parameters):
     common_arrays = CommonArrays(params)
         
     pitch_estimator = PitchEstimator(params)
@@ -44,6 +55,10 @@ def extract_features(sound: np.ndarray, params: Parameters):
         yield Feature(period, 
                       spectral_envelope_coeffs_periodic, 
                       spectral_envelope_coeffs_noise)
+        
+
+def extract_features_as_np_array(sound: np.ndarray, params: Parameters) -> np.ndarray:
+    return np.array([feature.numpy() for feature in extract_features(sound, params)])
 
 
 
