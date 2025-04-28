@@ -14,8 +14,8 @@ def get_mono_left_channel_sound_and_sampling_frequency(filename):
 
 def get_segment(sound=None, i_segment=None, params=None):
 
-    samples_per_segment = params["segment_len"]
-    n_gap = params["n_gap"]
+    samples_per_segment = params.segment_len
+    n_gap = params.n_gap
 
     i_start = n_gap * i_segment
     i_end = i_start + samples_per_segment
@@ -23,14 +23,4 @@ def get_segment(sound=None, i_segment=None, params=None):
         return sound[i_start: i_end]
     else:
         return np.zeros(i_end - i_start)
-
-
-if __name__ == "__main__":
-    filename = "/home/monsieur/projets/voice_conversion/data/bruce_willis/Studio/18.wav"
-    sound, sampling_frequency =  get_mono_left_channel_sound_and_sampling_frequency(filename)
-
-
-
-
-
 

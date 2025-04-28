@@ -3,49 +3,33 @@ from scipy.sparse import bsr_matrix
 from scipy.sparse.linalg import lsqr
 import numpy as np
 
+from feature_extraction.common_arrays import CommonArrays
+from common.parameters import Parameters
+from logging import Logger
+
+
+logger = Logger("PeriodicAndNoiseSeparator")
 
 class PeriodicAndNoiseSeparator:
 
-    def __init__(self, params=None):
+    def __init__(self, params:Parameters):
 
-        self.sampling_frequency = params["sampling_frequency"]
-
-        # number of points used for the FFT or correlation
-        self.segment_len = params["segment_len"]
-
-        self.apowin = params["apowin"]
-        self.apowin2 = params["apowin2"]
-
-        # Gap between slices of the audio
-        self.n_gap = params["n_gap"]
-
-        # We're only interested in the pitches of the spoken voice
-        # range of pitches (Hz)
-        self.fq_voice_min = params["fq_voice_min"]
-        self.fq_voice_max = params["fq_voice_max"]
-
-        # corresponding range of periods (expressed in number of samples)
-        self.period_min = round(self.sampling_frequency / self.fq_voice_max)
-        self.period_max = round(self.sampling_frequency / self.fq_voice_min)
-
+        
+        self.params = params
+        self.common_arrays = CommonArrays(params)
+        
         # table of regularly spaced periods (expressed in number of samples)
         # Each time delay in this vector is a candidate period
-        self.period_list = np.arange(self.period_min, self.period_max)
+        self.period_list = np.arange(params.period_min, params.period_max)
 
         # corresponding frequencies for the table of regularly spaced periods
-        self.frequency_list = np.array(self.sampling_frequency / self.period_list)
-
+        self.frequency_list = np.array(self.params.sampling_frequency / self.period_list)
 
         self.periodic_function_basis_dict = {}
-
-        if params["verbose"]:
-            print("Initializing periodic function basis for all periods...")
-
+        logger.info("Initializing periodic function basis for all periods...")
         for period in self.period_list:
             self.periodic_function_basis_dict[period] = self.create_apodized_periodic_function_basis_for_period(period)
-
-        if params["verbose"]:
-            print("Done.")
+        logger.info("Done.")
 
 
     def create_apodized_periodic_function_basis_for_period(self, period):
@@ -57,7 +41,7 @@ class PeriodicAndNoiseSeparator:
         :return: the matrix A, in sparse format
         """
 
-        n_row = self.segment_len
+        n_row = self.params.segment_len
         n_col = period
         # A = np.zeros((n_row, n_col))
         i = []
@@ -69,7 +53,7 @@ class PeriodicAndNoiseSeparator:
                 # A[k * period + phi, phi] = 1
                 i.append(k * period + phi)
                 j.append(phi)
-                data.append(self.apowin2[k * period + phi])
+                data.append(self.common_arrays.apowin2[k * period + phi])
                 k += 1
 
         # data = np.ones(len(i))
@@ -80,7 +64,7 @@ class PeriodicAndNoiseSeparator:
         return bsr_matrix((data, ij), shape=(n_row, n_col))
 
 
-    def separate_components(self, x_apodized=None, period=None):
+    def separate_components(self, x_apodized:np.ndarray, period:int):
         a = self.periodic_function_basis_dict[period]
         
         phase_amplitude = lsqr(a, x_apodized)
@@ -88,19 +72,4 @@ class PeriodicAndNoiseSeparator:
         noise_component = x_apodized - periodic_component
 
         return periodic_component, noise_component
-
-
-    def average_sigma2(self, segment_list):
-        sigma2_list = []
-        for s in segment_list:
-            sigma2_list.append(np.mean(np.square(s)))
-
-
-
-
-
-
-
-
-
 

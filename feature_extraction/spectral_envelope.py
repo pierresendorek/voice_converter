@@ -6,42 +6,31 @@ from scipy.sparse import linalg
 import scipy.io.wavfile
 import os
 from common.count_segments import count_segments
+from feature_extraction.common_arrays import CommonArrays
+from common.parameters import Parameters
 
 package_directory = os.path.dirname(os.path.abspath(__file__))
 
 # This class contains all variables needed for sound analysis, as well as methods for extracting features.
 class SpectralEnvelopeExtractor:
-
-    def __init__(self, params):
-
+    def __init__(self, params:Parameters):
         self.params = params
+        self.common_arrays = CommonArrays(params)
 
-        self.n_triangle_func = params['n_triangle_function']
-        self.sampling_frequency = params["sampling_frequency"]
-
+        
         # nFFT is the number samples taken to slice the audio into chunks for FFT analysis
         # When the sampling frequency is the default 44100, nFFT is 2048.
         # When the sampling rate is lower/higher, nFFT will be lower/higher.
-        self.nFFT = params["segment_len"]
+        self.nFFT = params.segment_len
 
         # Gap between slices of the audio
-        self.nGap = params["n_gap"]
-
-        self.apowin = params["apowin"]
-        self.apowin2 = params["apowin2"]
-
-
-        self.fq_elem_func_min = params["fq_elem_func_min"]
-        self.fq_elem_func_max = params["fq_elem_func_max"]
-
-        self.fq_elem_func = np.exp(np.linspace(np.log(self.fq_elem_func_min),
-                                               np.log(self.fq_elem_func_max),
-                                               self.n_triangle_func + 2))
+        self.fq_elem_func = np.exp(np.linspace(np.log(params.fq_elem_func_min),
+                                               np.log(params.fq_elem_func_max),
+                                               params.n_triangle_function + 2))
 
         self.triangle_window_matrix = self._create_triangle_window_matrix()
 
         #self.pseudo_inverse_transpose_triangle_windows_matrix = np.linalg.pinv(self.triangle_window_matrix.T)
-
         #self.projector_triangle_windows_matrix = np.linalg.pinv((self.triangle_window_matrix.T).dot(self.triangle_window_matrix).todense())
 
 
@@ -69,17 +58,17 @@ class SpectralEnvelopeExtractor:
 
 
     def _create_triangle_window_matrix(self):
-        A = np.zeros((int(self.nFFT//2), self.n_triangle_func))
-        for i in range(self.n_triangle_func):
+        A = np.zeros((int(self.nFFT//2), self.params.n_triangle_function))
+        for i in range(self.params.n_triangle_function):
             i_elem_func = i + 1
             fqC = self.fq_elem_func[i_elem_func]
             fqL = self.fq_elem_func[i_elem_func - 1]
             fqR = self.fq_elem_func[i_elem_func + 1]
 
             # only filling in non-zero values
-            normalizedFqL = fqL * self.nFFT / self.sampling_frequency
-            normalizedFqR = fqR * self.nFFT / self.sampling_frequency
-            normalizedFqC = fqC * self.nFFT / self.sampling_frequency
+            normalizedFqL = fqL * self.nFFT / self.params.sampling_frequency
+            normalizedFqR = fqR * self.nFFT / self.params.sampling_frequency
+            normalizedFqC = fqC * self.nFFT / self.params.sampling_frequency
             for iFq in range(int(np.floor(normalizedFqL)), int(min([np.ceil(normalizedFqR), self.nFFT//2]))):
                 A[iFq, i] = self._triangle(iFq, normalizedFqL, normalizedFqC, normalizedFqR)
 
@@ -90,12 +79,12 @@ class SpectralEnvelopeExtractor:
         return bsr_matrix(A)
 
 
-    def get_spectrum(self, x_apodized=None):
+    def get_spectrum(self, x_apodized:np.ndarray) -> np.ndarray:
         abs_fft_x_apodized = np.abs(np.fft.fft(x_apodized))
         spectrum = abs_fft_x_apodized[0:int(self.nFFT // 2)]
         return spectrum
 
-    def get_spectral_envelope_coeffs(self, x_apodized=None):
+    def get_coeffs(self, x_apodized:np.ndarray) -> np.ndarray:
         """
         :param x_apodized: sound segment multiplied by apowin2
         :return: average energy per frequency band
@@ -104,32 +93,28 @@ class SpectralEnvelopeExtractor:
         spectral_envelope_coeffs = (self.triangle_window_matrix.T).dot(spectrum)
         return spectral_envelope_coeffs
 
-    def get_spectral_enveloppe_from_coeffs(self, spectral_envelope_coeffs):
-
+    
+    def get_half_spectral_enveloppe_from_coeffs(self, spectral_envelope_coeffs):
         return lsqr(self.triangle_window_matrix.T, spectral_envelope_coeffs, damp=1E-9)[0]
 
-
     def get_full_spectral_envelope_from_coeffs(self, spectal_envelope_coeffs):
-
-        half_spectral_envelope = self.get_spectral_enveloppe_from_coeffs(spectal_envelope_coeffs)
-        full_spectral_envelope = np.zeros(self.nFFT)
+        half_spectral_envelope = self.get_half_spectral_enveloppe_from_coeffs(spectal_envelope_coeffs)
+        full_spectral_envelope = np.zeros(self.params.segment_len)
         full_spectral_envelope[0:self.nFFT//2] = half_spectral_envelope
         full_spectral_envelope[self.nFFT//2:self.nFFT] = half_spectral_envelope[::-1]
-
         return full_spectral_envelope
 
 
-    def get_spectral_envelope_from_sound(self, sound=None):
+    # def get_spectral_envelope_from_sound(self, sound=None):
 
-        apowin2 = self.apowin2
-        n_segment = count_segments(sound=sound, params=self.params)
-        spectral_envelope_coeffs_list = []
+    #     n_segment = count_segments(sound=sound, params=self.params)
+    #     spectral_envelope_coeffs_list = []
 
-        for i_segment in range(n_segment):
-            x = get_segment(sound=sound, i_segment=i_segment, params=self.params)
-            x_apodized = x * apowin2
-            spectral_envelope_coeffs = self.get_spectral_envelope_coeffs(x_apodized)
-            spectral_envelope_coeffs_list.append(spectral_envelope_coeffs)
+    #     for i_segment in range(n_segment):
+    #         x = get_segment(sound=sound, i_segment=i_segment, params=self.params)
+    #         x_apodized = x * self.common_arrays.apowin2
+    #         spectral_envelope_coeffs = self.get_coeffs(x_apodized)
+    #         spectral_envelope_coeffs_list.append(spectral_envelope_coeffs)
 
-        return spectral_envelope_coeffs_list
+    #     return spectral_envelope_coeffs_list
 

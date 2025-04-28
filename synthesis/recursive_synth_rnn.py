@@ -9,7 +9,7 @@ import numpy as np
 from database_tools.sound_file_loader import get_mono_left_channel_sound_and_sampling_frequency
 from feature_extraction.feature_vector_array_dict_conversion_helpers import feature_vector_array_to_feature_dict
 from feature_extraction.pair_sequence_feature_target_getter import PairSoundFeature
-from feature_extraction.voice_feature_extractor import VoiceFeatureExtractor
+from feature_extraction.old_voice_feature_extractor import VoiceFeatureExtractor
 from params.params import get_params
 from common.math.relu import relu, np_relu
 from synthesis.voice_synthesizer import generate_filtered_noise, generate_periodic_sound, \

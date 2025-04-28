@@ -20,8 +20,6 @@ def get_params():
         "use_gpu":False} # 20
 
     params["n_gap"] = params["segment_len"] // 4 # 512 samples @ 44100Hz ~ 0.011 of a second
-
-
     params["apowin"] = np.sin(np.linspace(0, np.pi, num=params["segment_len"], endpoint=False))
     params["apowin2"] = params["apowin"] ** 2
 

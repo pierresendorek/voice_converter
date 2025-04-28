@@ -2,12 +2,12 @@ from params.params import get_params
 from database_tools.sound_file_loader import get_mono_left_channel_sound_and_sampling_frequency
 from feature_extraction.pitch_estimator import PitchEstimator
 from feature_extraction.periodic_and_noise_separator import PeriodicAndNoiseSeparator
-from feature_extraction.spectral_enveloppe_extractor import SpectralEnvelopeExtractor
+from feature_extraction.spectral_envelope import SpectralEnvelopeExtractor
 from common.count_segments import count_segments
 from database_tools.sound_file_loader import get_segment
 import matplotlib.pyplot as plt
 import numpy as np
-from feature_extraction.voice_feature_extractor import voice_feature_extractor
+from feature_extraction.old_voice_feature_extractor import voice_feature_extractor
 
 
 params = get_params()

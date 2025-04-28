@@ -1,47 +1,43 @@
 import numpy as np
 from scipy.sparse import linalg
 
-# TODO : try to compile this class
+from feature_extraction.common_arrays import CommonArrays
+from common.parameters import Parameters
+
 
 class PitchEstimator:
 
-    def __init__(self, params=None):
+    def __init__(self, params: Parameters):
+        self.params = params
 
-        self.sampling_frequency = params["sampling_frequency"]
+        common_arrays = CommonArrays(params)
 
-        # number of points used for the FFT or correlation
-        self.segment_len = params["segment_len"]
-
-        self.apowin = np.sin(np.linspace(0, np.pi, num=self.segment_len, endpoint=False))
-        self.apowin2 = self.apowin ** 2
+        self.apowin = common_arrays.apowin
+        self.apowin2 = common_arrays.apowin2
 
         # Gap between slices of the audio
-        self.n_gap = params["n_gap"]
 
         # We're only interested in the pitches of the spoken voice
         # range of pitches (Hz)
-        self.fq_voice_min = params["fq_voice_min"]
-        self.fq_voice_max = params["fq_voice_max"]
-
         # corresponding range of periods (expressed in number of samples)
-        self.period_min = round(self.sampling_frequency / self.fq_voice_max)
-        self.period_max = round(self.sampling_frequency / self.fq_voice_min)
+        self.period_min = round(params.sampling_frequency / params.fq_voice_max)
+        self.period_max = round(params.sampling_frequency / params.fq_voice_min)
 
         # table of regularly spaced periods (expressed in number of samples)
         # Each time delay in this vector is a candidate period
         self.period_list = np.arange(self.period_min, self.period_max)
 
-        # corresponding frequencies for the table of regularly spaced periods
-        self.frequency_list = np.array(self.sampling_frequency / self.period_list)
+        ## corresponding frequencies for the table of regularly spaced periods
+        #self.frequency_list = np.array(params.sampling_frequency / self.period_list)
 
-        self.diffForPeriod = np.zeros(self.period_max - self.period_min)
+        self.diff_for_period = np.zeros(self.period_max - self.period_min)
 
 
-    def estimate_period(self, x):
+    def estimate_period(self, x:np.ndarray) -> int:
         return self.estimate_period_least_difference_FFT(x)
 
 
-    def estimate_period_least_difference_FFT(self, x):
+    def estimate_period_least_difference_FFT(self, x) -> int:
         """
         Returns the period as an amount of samples
         :param self:
@@ -53,12 +49,12 @@ class PitchEstimator:
         cumsum_x2 = np.cumsum((xApo) ** 2)
         terme_croise = np.correlate(xApo, xApo, mode="full")
 
-        N = self.segment_len
-        for iPeriod in range(1, self.period_max - self.period_min):
-            period = self.period_min + iPeriod
-            self.diffForPeriod[iPeriod] = (cumsum_x2[int(N - 1 - period)] + cumsum_x2[int(N - 1)] - cumsum_x2[
+        N = self.params.segment_len
+        for i_period in range(1, self.period_max - self.period_min):
+            period = self.period_min + i_period
+            self.diff_for_period[i_period] = (cumsum_x2[int(N - 1 - period)] + cumsum_x2[int(N - 1)] - cumsum_x2[
                 int(period - 1)] - 2 * terme_croise[int(N - 1 + period)]) / (N - period)
-        return np.argmin(self.diffForPeriod[1:]) + self.period_min + 1
+        return np.argmin(self.diff_for_period[1:]) + self.period_min + 1
 
 
 
